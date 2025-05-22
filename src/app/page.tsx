@@ -395,7 +395,7 @@ export default function Home() {
             if (Notification.permission === 'granted') {
                 console.log("Notification permission granted.");
                 if (isClientMobile) {
-                    const mobileNotificationTitle = 'TradeFlow Alert!'; // App name used
+                    const mobileNotificationTitle = 'TradeFlow Alert!'; 
                     const mobileNotificationOptions = {
                         body: `${coin} is within your set range at $${price.toFixed(2)}. Time to check!`,
                         icon: commonIcon,
@@ -416,14 +416,14 @@ export default function Home() {
                             new Notification(mobileNotificationTitle, mobileNotificationOptions); 
                             console.log('Fallback: Notification sent via Notification API on mobile.');
                         } catch (err) {
-                            console.error('Fallback: Mobile Notification API error:', err); // Corrected typo
+                            console.error('Fallback: Mobile Notification API error:', err);
                         }
                     }
                 } else { 
                     console.log("Desktop device detected. Using Notification API.");
-                    const desktopNotificationTitle = `TradeFlow Desktop Alert: ${coin} Price Target!`; // Customized Title
+                    const desktopNotificationTitle = `TradeFlow Desktop Alert: ${coin} Price Target!`; 
                     const desktopNotificationOptions = {
-                        body: `Heads up! ${coin} reached $${price.toFixed(2)}, landing in your alert zone. Time to strategize.`, // Customized Body
+                        body: `Heads up! ${coin} reached $${price.toFixed(2)}, landing in your alert zone. Time to strategize.`, 
                         icon: commonIcon, 
                     };
                     try {
@@ -654,7 +654,7 @@ export default function Home() {
                   <span className="text-sm text-[#5c748a] whitespace-nowrap">{fomcDateString}</span>
               )}
             </header>
-            <div className="px-3 sm:px-5 md:px-8 lg:px-16 flex flex-1 justify-center py-5"> {/* Adjusted padding here */}
+            <div className="px-2 sm:px-4 md:px-6 lg:px-12 flex flex-1 justify-center py-5">
               <div className="layout-content-container flex flex-col max-w-[960px] flex-1 md:max-w-4xl lg:max-w-5xl">
                 
                 <h2 className="text-[#101518] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">Quick Actions</h2>
