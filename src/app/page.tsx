@@ -574,7 +574,7 @@ export default function Home() {
                         <div className="grid gap-5">
                             <div>
                                 <label htmlFor="accountBalance" className="block text-sm font-medium text-[#5c748a] mb-1">Account Balance ($)</label>
-                                <Input type="number" id="accountBalance" placeholder="e.g., 1000" value={accountBalance} onChange={(e) => setAccountBalance(e.target.value)} className="form-input w-full rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
+                                <Input type="number" id="accountBalance" placeholder="" value={accountBalance} onChange={(e) => setAccountBalance(e.target.value)} className="form-input w-full rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
                             </div>
                             <div>
                                 <label htmlFor="cryptoEntry" className="block text-sm font-medium text-[#5c748a] mb-1">Entry Price</label>
@@ -686,3 +686,4 @@ export default function Home() {
         </div>
     );
 }
+
