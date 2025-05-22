@@ -538,31 +538,37 @@ export default function Home() {
                 return (
                     <div className="p-4 space-y-6">
                         <h2 className="text-[#101518] text-[22px] font-bold leading-tight tracking-[-0.015em] pb-3">Pips Calculator</h2>
-                        <div className="grid gap-5">
-                            <div>
-                                <label htmlFor="stopLoss" className="block text-sm font-medium text-[#5c748a] mb-1">Stop Loss</label>
-                                <Input type="number" id="stopLoss" value={stopLoss} onChange={(e) => setStopLoss(e.target.value)} className="form-input w-full rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
+                        <div className="flex flex-col md:flex-row gap-6">
+                             {/* Inputs Section (Left) */}
+                            <div className="md:w-1/2 space-y-5">
+                                <div>
+                                    <label htmlFor="stopLoss" className="block text-sm font-medium text-[#5c748a] mb-1">Stop Loss</label>
+                                    <Input type="number" id="stopLoss" value={stopLoss} onChange={(e) => setStopLoss(e.target.value)} className="form-input w-full rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
+                                </div>
+                                <div>
+                                    <label htmlFor="entry" className="block text-sm font-medium text-[#5c748a] mb-1">Entry</label>
+                                    <Input type="number" id="entry" value={entry} onChange={(e) => setEntry(e.target.value)}  className="form-input w-full rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
+                                </div>
+                                <div>
+                                    <label htmlFor="takeProfit" className="block text-sm font-medium text-[#5c748a] mb-1">Take Profit</label>
+                                    <Input type="number" id="takeProfit" value={takeProfit} onChange={(e) => setTakeProfit(e.target.value)}  className="form-input w-full rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
+                                </div>
+                                <div>
+                                    <label htmlFor="decimalPlaces" className="block text-sm font-medium text-[#5c748a] mb-1">Decimal Places</label>
+                                    <select id="decimalPlaces" value={decimalPlaces} onChange={(e) => setDecimalPlaces(parseInt(e.target.value))} className="form-select block w-full rounded-xl border-[#d4dce2] bg-[#eaedf1] h-12 px-4 text-[#101518] focus:ring-0 focus:border-[#5c748a]">
+                                        <option value={1}>1</option><option value={2}>2</option><option value={3}>3</option><option value={4}>4</option><option value={5}>5</option>
+                                    </select>
+                                </div>
                             </div>
-                            <div>
-                                <label htmlFor="entry" className="block text-sm font-medium text-[#5c748a] mb-1">Entry</label>
-                                <Input type="number" id="entry" value={entry} onChange={(e) => setEntry(e.target.value)}  className="form-input w-full rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
-                            </div>
-                            <div>
-                                <label htmlFor="takeProfit" className="block text-sm font-medium text-[#5c748a] mb-1">Take Profit</label>
-                                <Input type="number" id="takeProfit" value={takeProfit} onChange={(e) => setTakeProfit(e.target.value)}  className="form-input w-full rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
-                            </div>
-                            <div>
-                                <label htmlFor="decimalPlaces" className="block text-sm font-medium text-[#5c748a] mb-1">Decimal Places</label>
-                                <select id="decimalPlaces" value={decimalPlaces} onChange={(e) => setDecimalPlaces(parseInt(e.target.value))} className="form-select block w-full rounded-xl border-[#d4dce2] bg-[#eaedf1] h-12 px-4 text-[#101518] focus:ring-0 focus:border-[#5c748a]">
-                                    <option value={1}>1</option><option value={2}>2</option><option value={3}>3</option><option value={4}>4</option><option value={5}>5</option>
-                                </select>
-                            </div>
-                            {pipsOfRisk !== null && pipsOfReward !== null && riskRewardRatio !== null && (
-                                <div className="space-y-2 mt-4 p-4 bg-[#eaedf1] rounded-xl">
-                                    <p className="text-lg font-semibold text-[#101518]">Result:</p>
-                                    <p className="text-[#101518]">Pips of Risk: <span className="font-medium text-[#5c748a]">{pipsOfRisk.toFixed(2)}</span></p>
-                                    <p className="text-[#101518]">Pips of Reward: <span className="font-medium text-[#5c748a]">{pipsOfReward.toFixed(2)}</span></p>
-                                    <p className="text-[#101518]">Risk/Reward Ratio: <span className="font-medium text-[#5c748a]">{riskRewardRatio.toFixed(2)} : 1</span></p>
+                            {/* Results Section (Right) */}
+                            {(pipsOfRisk !== null || pipsOfReward !== null || riskRewardRatio !== null) && (
+                                 <div className="md:w-1/2 flex items-start">
+                                    <div className="w-full space-y-2 p-4 bg-[#eaedf1] rounded-xl">
+                                        <p className="text-lg font-semibold text-[#101518]">Result:</p>
+                                        {pipsOfRisk !== null && <p className="text-[#101518]">Pips of Risk: <span className="font-medium text-[#5c748a]">{pipsOfRisk.toFixed(2)}</span></p>}
+                                        {pipsOfReward !== null && <p className="text-[#101518]">Pips of Reward: <span className="font-medium text-[#5c748a]">{pipsOfReward.toFixed(2)}</span></p>}
+                                        {riskRewardRatio !== null && <p className="text-[#101518]">Risk/Reward Ratio: <span className="font-medium text-[#5c748a]">{riskRewardRatio.toFixed(2)} : 1</span></p>}
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -661,7 +667,7 @@ export default function Home() {
                   <span className="text-sm text-[#5c748a] whitespace-nowrap">{fomcDateString}</span>
               )}
             </header>
-            <div className="px-1 sm:px-2 md:px-4 lg:px-8 flex flex-1 justify-center py-5"> {/* Adjusted padding */}
+            <div className="px-1 sm:px-2 md:px-4 lg:px-8 flex flex-1 justify-center py-5">
               <div className="layout-content-container flex flex-col max-w-[960px] flex-1">
                 
                 <h2 className="text-[#101518] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">Quick Actions</h2>
@@ -694,3 +700,4 @@ export default function Home() {
         </div>
     );
 }
+
