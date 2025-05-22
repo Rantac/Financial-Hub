@@ -572,36 +572,43 @@ export default function Home() {
                 return (
                     <div className="p-4 space-y-6">
                         <h2 className="text-[#101518] text-[22px] font-bold leading-tight tracking-[-0.015em] pb-3">Crypto Position Size Calculator</h2>
-                        <div className="grid gap-5">
-                            <div>
-                                <label htmlFor="accountBalance" className="block text-sm font-medium text-[#5c748a] mb-1">Account Balance ($)</label>
-                                <Input type="number" id="accountBalance" placeholder="" value={accountBalance} onChange={(e) => setAccountBalance(e.target.value)} className="form-input w-1/2 rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
+                        <div className="flex flex-col md:flex-row gap-6">
+                            {/* Inputs Section (Left) */}
+                            <div className="md:w-1/2 space-y-5">
+                                <div>
+                                    <label htmlFor="accountBalance" className="block text-sm font-medium text-[#5c748a] mb-1">Account Balance ($)</label>
+                                    <Input type="number" id="accountBalance" placeholder="" value={accountBalance} onChange={(e) => setAccountBalance(e.target.value)} className="form-input w-1/2 rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
+                                </div>
+                                <div>
+                                    <label htmlFor="cryptoEntry" className="block text-sm font-medium text-[#5c748a] mb-1">Entry Price</label>
+                                    <Input type="number" id="cryptoEntry" placeholder="" value={cryptoEntry} onChange={(e) => setCryptoEntry(e.target.value)} className="form-input w-1/2 rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
+                                </div>
+                                <div>
+                                    <label htmlFor="cryptoSL" className="block text-sm font-medium text-[#5c748a] mb-1">Stop Loss Price</label>
+                                    <Input type="number" id="cryptoSL" placeholder="" value={cryptoSL} onChange={(e) => setCryptoSL(e.target.value)} className="form-input w-1/2 rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
+                                </div>
+                                <div>
+                                    <label htmlFor="cryptoTP" className="block text-sm font-medium text-[#5c748a] mb-1">Take Profit Price (Optional)</label>
+                                    <Input type="number" id="cryptoTP" placeholder="" value={cryptoTP} onChange={(e) => setCryptoTP(e.target.value)} className="form-input w-1/2 rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
+                                </div>
+                                <div>
+                                    <label htmlFor="riskPercentage" className="block text-sm font-medium text-[#5c748a] mb-1">Risk Percentage (%)</label>
+                                    <Input type="number" id="riskPercentage" placeholder="" value={riskPercentage} onChange={(e) => setRiskPercentage(e.target.value)} className="form-input w-1/2 rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
+                                </div>
                             </div>
-                            <div>
-                                <label htmlFor="cryptoEntry" className="block text-sm font-medium text-[#5c748a] mb-1">Entry Price</label>
-                                <Input type="number" id="cryptoEntry" placeholder="" value={cryptoEntry} onChange={(e) => setCryptoEntry(e.target.value)} className="form-input w-1/2 rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
-                            </div>
-                            <div>
-                                <label htmlFor="cryptoSL" className="block text-sm font-medium text-[#5c748a] mb-1">Stop Loss Price</label>
-                                <Input type="number" id="cryptoSL" placeholder="" value={cryptoSL} onChange={(e) => setCryptoSL(e.target.value)} className="form-input w-1/2 rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
-                            </div>
-                            <div>
-                                <label htmlFor="cryptoTP" className="block text-sm font-medium text-[#5c748a] mb-1">Take Profit Price (Optional)</label>
-                                <Input type="number" id="cryptoTP" placeholder="" value={cryptoTP} onChange={(e) => setCryptoTP(e.target.value)} className="form-input w-1/2 rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
-                            </div>
-                            <div>
-                                <label htmlFor="riskPercentage" className="block text-sm font-medium text-[#5c748a] mb-1">Risk Percentage (%)</label>
-                                <Input type="number" id="riskPercentage" placeholder="" value={riskPercentage} onChange={(e) => setRiskPercentage(e.target.value)} className="form-input w-1/2 rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
-                            </div>
+
+                            {/* Results Section (Right) */}
                             {(positionSize !== null || cryptoRiskRewardRatio !== null) && (
-                                <div className="space-y-2 mt-4 p-4 bg-[#eaedf1] rounded-xl">
-                                    <p className="text-lg font-semibold text-[#101518]">Result:</p>
-                                    {positionSize !== null && (
-                                        <p className="text-[#101518]">Position Size (Units of Crypto): <span className="font-medium text-[#5c748a]">{positionSize.toFixed(4)}</span></p>
-                                    )}
-                                    {cryptoRiskRewardRatio !== null && (
-                                        <p className="text-[#101518]">Risk/Reward Ratio: <span className="font-medium text-[#5c748a]">{cryptoRiskRewardRatio.toFixed(2)} : 1</span></p>
-                                    )}
+                                <div className="md:w-1/2 flex items-start">
+                                    <div className="w-full space-y-2 p-4 bg-[#eaedf1] rounded-xl">
+                                        <p className="text-lg font-semibold text-[#101518]">Result:</p>
+                                        {positionSize !== null && (
+                                            <p className="text-[#101518]">Position Size (Units of Crypto): <span className="font-medium text-[#5c748a]">{positionSize.toFixed(4)}</span></p>
+                                        )}
+                                        {cryptoRiskRewardRatio !== null && (
+                                            <p className="text-[#101518]">Risk/Reward Ratio: <span className="font-medium text-[#5c748a]">{cryptoRiskRewardRatio.toFixed(2)} : 1</span></p>
+                                        )}
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -654,8 +661,8 @@ export default function Home() {
                   <span className="text-sm text-[#5c748a] whitespace-nowrap">{fomcDateString}</span>
               )}
             </header>
-            <div className="px-1 sm:px-2 md:px-4 lg:px-8 flex flex-1 justify-center py-5">
-              <div className="layout-content-container flex flex-col max-w-[960px] flex-1 md:max-w-4xl lg:max-w-5xl">
+            <div className="px-1 sm:px-2 md:px-4 lg:px-8 flex flex-1 justify-center py-5"> {/* Adjusted padding */}
+              <div className="layout-content-container flex flex-col max-w-[960px] flex-1">
                 
                 <h2 className="text-[#101518] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">Quick Actions</h2>
                 <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-3 p-4">
@@ -687,3 +694,4 @@ export default function Home() {
         </div>
     );
 }
+
