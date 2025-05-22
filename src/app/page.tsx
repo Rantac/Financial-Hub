@@ -394,7 +394,7 @@ export default function Home() {
             if (Notification.permission === 'granted') {
                 console.log("Notification permission granted.");
                 if (isClientMobile) {
-                    const mobileNotificationTitle = 'Finance Hub Mobile Alert!';
+                    const mobileNotificationTitle = 'Finance Hub Alert!';
                     const mobileNotificationOptions = {
                         body: `${coin} is within your set range at $${price.toFixed(2)}. Time to check!`,
                         icon: commonIcon,
@@ -653,7 +653,7 @@ export default function Home() {
                   <span className="text-sm text-[#5c748a] whitespace-nowrap">{fomcDateString}</span>
               )}
             </header>
-            <div className="px-4 sm:px-10 md:px-20 lg:px-40 flex flex-1 justify-center py-5">
+            <div className="px-4 sm:px-6 md:px-10 lg:px-20 flex flex-1 justify-center py-5"> {/* Adjusted padding here */}
               <div className="layout-content-container flex flex-col max-w-[960px] flex-1 md:max-w-4xl lg:max-w-5xl">
                 
                 <h2 className="text-[#101518] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">Quick Actions</h2>
