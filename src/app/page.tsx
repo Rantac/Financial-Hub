@@ -85,7 +85,11 @@ export default function Home() {
     const [isClientMobile, setIsClientMobile] = useState(false);
 
     useEffect(() => {
-      setIsClientMobile(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+      // This check should be done carefully to avoid SSR hydration issues.
+      // It's generally better to do this check once and store it.
+      if (typeof navigator !== 'undefined') {
+        setIsClientMobile(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+      }
     }, []);
 
 
@@ -379,7 +383,7 @@ export default function Home() {
     }, []);
 
     const sendNotification = (coin: string, price: number) => {
-        const commonIcon = '/favicon.ico'; 
+        const commonIcon = '/favicon.ico';
     
         console.log("Attempting to send notification...");
     
@@ -387,13 +391,13 @@ export default function Home() {
             if (Notification.permission === 'granted') {
                 console.log("Notification permission granted.");
                 if (isClientMobile) {
-                    const mobileNotificationTitle = 'Price Alert!';
+                    const mobileNotificationTitle = 'Mobile Price Alert!'; // Changed title
                     const mobileNotificationOptions = {
-                        body: `${coin} is within your waiting price range at $${price.toFixed(2)}`,
+                        body: `${coin} is within your set range at $${price.toFixed(2)}. Check the app!`, // Changed body
                         icon: commonIcon,
                     };
                     console.log("Mobile device detected. Using Service Worker for notification.");
-                    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) { 
+                    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
                         navigator.serviceWorker.ready.then(registration => {
                             console.log("Service Worker is ready. Attempting to show notification.");
                             registration.showNotification(mobileNotificationTitle, mobileNotificationOptions)
@@ -407,7 +411,7 @@ export default function Home() {
                          try {
                             new Notification(mobileNotificationTitle, mobileNotificationOptions); 
                             console.log('Fallback: Notification sent via Notification API on mobile.');
-                        } catch (err) {
+                        } catch (err) { // Corrected err parameter
                             console.error('Fallback: Mobile Notification API error:', err);
                         }
                     }
@@ -415,7 +419,7 @@ export default function Home() {
                     console.log("Desktop device detected. Using Notification API.");
                     const desktopNotificationTitle = `Desktop Alert: ${coin} Price Update!`; 
                     const desktopNotificationOptions = {
-                        body: `Heads up! ${coin} is now $${price.toFixed(2)} and has entered your specified alert range.`,
+                        body: `Heads up! ${coin} is now $${price.toFixed(2)} and has entered your specified alert range. Time to check your charts!`, // Changed body for desktop
                         icon: commonIcon, 
                         // requireInteraction: true, // Optional: makes notification sticky on some systems
                     };
@@ -470,7 +474,7 @@ export default function Home() {
 
     return (
         <main className="flex flex-col items-center justify-start min-h-screen p-4 md:p-10">
-            <Card className="w-full max-w-md space-y-4 bg-card text-card-foreground rounded-xl shadow-lg">
+            <Card className="w-full max-w-md md:max-w-xl lg:max-w-2xl space-y-4 bg-card text-card-foreground rounded-xl shadow-lg">
                 <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0 pt-6 px-6">
                     <CardTitle className="text-2xl font-bold text-accent">PX</CardTitle>
                      {fomcDateString && (
@@ -667,7 +671,7 @@ export default function Home() {
                         <TabsContent value="Market" className="space-y-6 p-6">
                             {loading && <p className="text-center text-muted-foreground">Loading market data...</p>}
                             {error && <p className="text-center text-destructive">{error}</p>}
-                            <div className="grid grid-cols-1 gap-y-5">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-y-5 gap-x-4">
                                 {(Object.keys(coinPrices) as CoinSymbol[]).map((coinSymbol) => (
                                     <div key={coinSymbol} className="space-y-2 p-4 bg-secondary rounded-lg shadow-sm">
                                         <p className="text-lg text-foreground font-semibold">{coinSymbol}: <span className="font-normal text-accent">{coinPrices[coinSymbol] !== null ? `$${coinPrices[coinSymbol]!.toFixed(2)}` : 'Loading...'}</span></p>
@@ -695,3 +699,5 @@ export default function Home() {
         </main>
     );
 }
+
+    
