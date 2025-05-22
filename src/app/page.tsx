@@ -420,9 +420,9 @@ export default function Home() {
                     }
                 } else { 
                     console.log("Desktop device detected. Using Notification API.");
-                    const desktopNotificationTitle = `Finance Hub Desktop: ${coin} Alert!`; 
+                    const desktopNotificationTitle = `Desktop Alert: ${coin} Price Target Reached!`; 
                     const desktopNotificationOptions = {
-                        body: `Heads up! ${coin} is now $${price.toFixed(2)}, entering your alert range. Check your charts.`,
+                        body: `Attention: ${coin} is now trading at $${price.toFixed(2)}, which is within your specified alert range. Consider reviewing your charts and positions.`,
                         icon: commonIcon, 
                     };
                     try {
@@ -658,6 +658,10 @@ export default function Home() {
                 
                 <h2 className="text-[#101518] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">Quick Actions</h2>
                 <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-3 p-4">
+                  <button onClick={() => toggleSection('notes')} className={cn("flex flex-1 gap-3 rounded-lg border p-4 items-center transition-colors focus:outline-none focus:ring-2 focus:ring-[#5c748a]", activeSection === 'notes' ? "bg-[#d4dce2] border-[#5c748a]" : "bg-gray-50 border-[#d4dce2] hover:bg-[#eaedf1]")}>
+                    <div className="text-[#101518]"><NoteIcon /></div>
+                    <h2 className="text-[#101518] text-base font-bold leading-tight text-left">Epic Notes</h2>
+                  </button>
                   <button onClick={() => toggleSection('pips')} className={cn("flex flex-1 gap-3 rounded-lg border p-4 items-center transition-colors focus:outline-none focus:ring-2 focus:ring-[#5c748a]", activeSection === 'pips' ? "bg-[#d4dce2] border-[#5c748a]" : "bg-gray-50 border-[#d4dce2] hover:bg-[#eaedf1]")}>
                     <div className="text-[#101518]"><CurrencyCircleDollarIcon /></div>
                     <h2 className="text-[#101518] text-base font-bold leading-tight text-left">Pips Calculator</h2>
@@ -669,10 +673,6 @@ export default function Home() {
                   <button onClick={() => toggleSection('market')} className={cn("flex flex-1 gap-3 rounded-lg border p-4 items-center transition-colors focus:outline-none focus:ring-2 focus:ring-[#5c748a]", activeSection === 'market' ? "bg-[#d4dce2] border-[#5c748a]" : "bg-gray-50 border-[#d4dce2] hover:bg-[#eaedf1]")}>
                     <div className="text-[#101518]"><ChartLineIcon /></div>
                     <h2 className="text-[#101518] text-base font-bold leading-tight text-left">Market Pricing</h2>
-                  </button>
-                   <button onClick={() => toggleSection('notes')} className={cn("flex flex-1 gap-3 rounded-lg border p-4 items-center transition-colors focus:outline-none focus:ring-2 focus:ring-[#5c748a]", activeSection === 'notes' ? "bg-[#d4dce2] border-[#5c748a]" : "bg-gray-50 border-[#d4dce2] hover:bg-[#eaedf1]")}>
-                    <div className="text-[#101518]"><NoteIcon /></div>
-                    <h2 className="text-[#101518] text-base font-bold leading-tight text-left">Epic Notes</h2>
                   </button>
                 </div>
                 
