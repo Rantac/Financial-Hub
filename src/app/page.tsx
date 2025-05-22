@@ -10,7 +10,6 @@ import { useToast } from "@/hooks/use-toast";
 
 // Import new icons
 import FinanceHubLogoIcon from '@/components/icons/FinanceHubLogoIcon';
-import MagnifyingGlassIcon from '@/components/icons/MagnifyingGlassIcon';
 import CurrencyCircleDollarIcon from '@/components/icons/CurrencyCircleDollarIcon';
 import CurrencyBtcIcon from '@/components/icons/CurrencyBtcIcon';
 import ChartLineIcon from '@/components/icons/ChartLineIcon';
@@ -47,7 +46,7 @@ function getMonthIndex(monthName: string): number {
   return monthMap[monthName.slice(0,3)];
 }
 
-type ActiveSection = 'notes' | 'pips' | 'crypto' | 'market';
+type ActiveSection = 'notes' | 'pips' | 'crypto' | 'market' | null;
 
 export default function Home() {
     const [tasks, setTasks] = useState<Task[]>([]);
@@ -56,7 +55,6 @@ export default function Home() {
     const inputRef = useRef<HTMLInputElement>(null);
     const [fomcDateString, setFomcDateString] = useState('');
     const [activeSection, setActiveSection] = useState<ActiveSection>('notes');
-    const [searchTerm, setSearchTerm] = useState('');
 
 
     // Forex Calculator State
@@ -380,15 +378,15 @@ export default function Home() {
             }
         };
 
-        if (activeSection === 'market') { // Fetch only when market section is active
+        if (activeSection === 'market') {
           fetchMarketData();
           const intervalId = setInterval(fetchMarketData, 1200000); 
           return () => clearInterval(intervalId); 
         }
-    }, [activeSection]); // Re-fetch if activeSection changes to 'market'
+    }, [activeSection]);
 
     const sendNotification = (coin: string, price: number) => {
-        const commonIcon = '/favicon.ico'; // Consider creating a proper icon
+        const commonIcon = '/favicon.ico'; 
     
         console.log("Attempting to send notification...");
     
@@ -422,9 +420,9 @@ export default function Home() {
                     }
                 } else { 
                     console.log("Desktop device detected. Using Notification API.");
-                    const desktopNotificationTitle = `Desktop Alert: ${coin} Price Update!`; 
+                    const desktopNotificationTitle = `Desktop Finance Hub: ${coin} Alert!`; 
                     const desktopNotificationOptions = {
-                        body: `Heads up! ${coin} is now $${price.toFixed(2)} and has entered your specified alert range. Time to check your charts!`,
+                        body: `Time to check your charts! ${coin} is now $${price.toFixed(2)}, entering your alert range.`,
                         icon: commonIcon, 
                     };
                     try {
@@ -475,6 +473,9 @@ export default function Home() {
         }
     }, [coinPrices, waitingPrices, isClientMobile]);
 
+    const toggleSection = (section: ActiveSection) => {
+        setActiveSection(prevSection => prevSection === section ? null : section);
+    };
 
     const renderActiveSection = () => {
         switch (activeSection) {
@@ -489,27 +490,28 @@ export default function Home() {
                                     key={task.id}
                                     className="flex items-center gap-4 bg-gray-50 px-4 min-h-[72px] py-3 border-b border-[#eaedf1]"
                                 >
-                                    <div className="flex items-center">
-                                      <Button
-                                          variant="ghost"
-                                          size="icon"
-                                          aria-label={task.completed ? "Mark task as incomplete" : "Mark task as complete"}
-                                          className="rounded-full h-8 w-8 hover:bg-gray-200 data-[completed=true]:bg-gray-300"
-                                          data-completed={task.completed}
-                                          onClick={() => handleCompleteTask(task.id)}
-                                      >
-                                          {task.completed ? (
-                                              <Check className="h-5 w-5 text-green-600"/>
-                                          ) : (
-                                              <Circle className="h-5 w-5 text-[#5c748a]"/>
-                                          )}
-                                      </Button>
+                                    <div className="text-[#101518] flex items-center justify-center rounded-lg bg-[#eaedf1] shrink-0 size-12">
+                                        <NoteIcon />
                                     </div>
                                     <div className="flex-1 flex flex-col justify-center">
                                         <p className={cn("text-[#101518] text-base font-medium leading-normal", task.completed && "line-through text-[#5c748a]")}>
                                             {task.description}
                                         </p>
                                     </div>
+                                     <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        aria-label={task.completed ? "Mark task as incomplete" : "Mark task as complete"}
+                                        className="rounded-full h-8 w-8 hover:bg-gray-200 data-[completed=true]:bg-gray-300"
+                                        data-completed={task.completed}
+                                        onClick={() => handleCompleteTask(task.id)}
+                                    >
+                                        {task.completed ? (
+                                            <Check className="h-5 w-5 text-green-600"/>
+                                        ) : (
+                                            <Circle className="h-5 w-5 text-[#5c748a]"/>
+                                        )}
+                                    </Button>
                                     <Button variant="ghost" size="icon" aria-label="Delete task" className="h-8 w-8 hover:bg-gray-200 rounded-full text-[#5c748a] hover:text-red-500"
                                                 onClick={() => handleDeleteTask(task.id)}>
                                             <Trash className="h-4 w-4"/>
@@ -642,7 +644,7 @@ export default function Home() {
           <div className="layout-container flex h-full grow flex-col">
             <header className="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#eaedf1] px-10 py-3">
               <div className="flex items-center gap-4 text-[#101518]">
-                <div className="size-7 text-[#5c748a]"> {/* Adjusted size and color for logo */}
+                <div className="size-7 text-[#5c748a]"> 
                   <FinanceHubLogoIcon />
                 </div>
                 <h2 className="text-[#101518] text-lg font-bold leading-tight tracking-[-0.015em]">Finance Hub</h2>
@@ -653,40 +655,22 @@ export default function Home() {
             </header>
             <div className="px-4 sm:px-10 md:px-20 lg:px-40 flex flex-1 justify-center py-5">
               <div className="layout-content-container flex flex-col max-w-[960px] flex-1">
-                <div className="px-4 py-3">
-                  <label className="flex flex-col min-w-40 h-12 w-full">
-                    <div className="flex w-full flex-1 items-stretch rounded-xl h-full">
-                      <div
-                        className="text-[#5c748a] flex border-none bg-[#eaedf1] items-center justify-center pl-4 rounded-l-xl border-r-0"
-                      >
-                        <MagnifyingGlassIcon />
-                      </div>
-                      <input
-                        placeholder="Search (feature coming soon)"
-                        className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-r-xl text-[#101518] focus:outline-0 focus:ring-0 border-none bg-[#eaedf1] h-full placeholder:text-[#5c748a] px-4 pl-2 text-base font-normal leading-normal"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        disabled // Search not implemented
-                      />
-                    </div>
-                  </label>
-                </div>
                 
                 <h2 className="text-[#101518] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">Quick Actions</h2>
                 <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-3 p-4">
-                  <button onClick={() => setActiveSection('pips')} className="flex flex-1 gap-3 rounded-lg border border-[#d4dce2] bg-gray-50 p-4 items-center hover:bg-[#eaedf1] transition-colors focus:outline-none focus:ring-2 focus:ring-[#5c748a]">
+                  <button onClick={() => toggleSection('pips')} className={cn("flex flex-1 gap-3 rounded-lg border p-4 items-center transition-colors focus:outline-none focus:ring-2 focus:ring-[#5c748a]", activeSection === 'pips' ? "bg-[#d4dce2] border-[#5c748a]" : "bg-gray-50 border-[#d4dce2] hover:bg-[#eaedf1]")}>
                     <div className="text-[#101518]"><CurrencyCircleDollarIcon /></div>
                     <h2 className="text-[#101518] text-base font-bold leading-tight text-left">Pips Calculator</h2>
                   </button>
-                  <button onClick={() => setActiveSection('crypto')} className="flex flex-1 gap-3 rounded-lg border border-[#d4dce2] bg-gray-50 p-4 items-center hover:bg-[#eaedf1] transition-colors focus:outline-none focus:ring-2 focus:ring-[#5c748a]">
+                  <button onClick={() => toggleSection('crypto')} className={cn("flex flex-1 gap-3 rounded-lg border p-4 items-center transition-colors focus:outline-none focus:ring-2 focus:ring-[#5c748a]", activeSection === 'crypto' ? "bg-[#d4dce2] border-[#5c748a]" : "bg-gray-50 border-[#d4dce2] hover:bg-[#eaedf1]")}>
                     <div className="text-[#101518]"><CurrencyBtcIcon /></div>
                     <h2 className="text-[#101518] text-base font-bold leading-tight text-left">Crypto Calculator</h2>
                   </button>
-                  <button onClick={() => setActiveSection('market')} className="flex flex-1 gap-3 rounded-lg border border-[#d4dce2] bg-gray-50 p-4 items-center hover:bg-[#eaedf1] transition-colors focus:outline-none focus:ring-2 focus:ring-[#5c748a]">
+                  <button onClick={() => toggleSection('market')} className={cn("flex flex-1 gap-3 rounded-lg border p-4 items-center transition-colors focus:outline-none focus:ring-2 focus:ring-[#5c748a]", activeSection === 'market' ? "bg-[#d4dce2] border-[#5c748a]" : "bg-gray-50 border-[#d4dce2] hover:bg-[#eaedf1]")}>
                     <div className="text-[#101518]"><ChartLineIcon /></div>
                     <h2 className="text-[#101518] text-base font-bold leading-tight text-left">Market Pricing</h2>
                   </button>
-                   <button onClick={() => setActiveSection('notes')} className="flex flex-1 gap-3 rounded-lg border border-[#d4dce2] bg-gray-50 p-4 items-center hover:bg-[#eaedf1] transition-colors focus:outline-none focus:ring-2 focus:ring-[#5c748a]">
+                   <button onClick={() => toggleSection('notes')} className={cn("flex flex-1 gap-3 rounded-lg border p-4 items-center transition-colors focus:outline-none focus:ring-2 focus:ring-[#5c748a]", activeSection === 'notes' ? "bg-[#d4dce2] border-[#5c748a]" : "bg-gray-50 border-[#d4dce2] hover:bg-[#eaedf1]")}>
                     <div className="text-[#101518]"><NoteIcon /></div>
                     <h2 className="text-[#101518] text-base font-bold leading-tight text-left">Epic Notes</h2>
                   </button>
