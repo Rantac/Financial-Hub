@@ -14,6 +14,7 @@ import CurrencyCircleDollarIcon from '@/components/icons/CurrencyCircleDollarIco
 import CurrencyBtcIcon from '@/components/icons/CurrencyBtcIcon';
 import ChartLineIcon from '@/components/icons/ChartLineIcon';
 import NoteIcon from '@/components/icons/NoteIcon';
+import MagnifyingGlassIcon from '@/components/icons/MagnifyingGlassIcon';
 
 interface Task {
     id: string;
@@ -394,7 +395,7 @@ export default function Home() {
             if (Notification.permission === 'granted') {
                 console.log("Notification permission granted.");
                 if (isClientMobile) {
-                    const mobileNotificationTitle = 'Finance Hub Alert!';
+                    const mobileNotificationTitle = 'TradeFlow Alert!'; // App name used
                     const mobileNotificationOptions = {
                         body: `${coin} is within your set range at $${price.toFixed(2)}. Time to check!`,
                         icon: commonIcon,
@@ -415,14 +416,14 @@ export default function Home() {
                             new Notification(mobileNotificationTitle, mobileNotificationOptions); 
                             console.log('Fallback: Notification sent via Notification API on mobile.');
                         } catch (err) {
-                            console.error('Fallback: Mobile Notification API error:', err);
+                            console.error('Fallback: Mobile Notification API error:', err); // Corrected typo
                         }
                     }
                 } else { 
                     console.log("Desktop device detected. Using Notification API.");
-                    const desktopNotificationTitle = `Desktop Alert: ${coin} Price Target Reached!`; 
+                    const desktopNotificationTitle = `TradeFlow Desktop Alert: ${coin} Price Target!`; // Customized Title
                     const desktopNotificationOptions = {
-                        body: `Attention: ${coin} is now trading at $${price.toFixed(2)}, which is within your specified alert range. Consider reviewing your charts and positions.`,
+                        body: `Heads up! ${coin} reached $${price.toFixed(2)}, landing in your alert zone. Time to strategize.`, // Customized Body
                         icon: commonIcon, 
                     };
                     try {
@@ -647,13 +648,13 @@ export default function Home() {
                 <div className="size-7 text-[#5c748a]"> 
                   <FinanceHubLogoIcon />
                 </div>
-                <h2 className="text-[#101518] text-lg font-bold leading-tight tracking-[-0.015em]">Finance Hub</h2>
+                <h2 className="text-[#101518] text-lg font-bold leading-tight tracking-[-0.015em]">TradeFlow</h2>
               </div>
               {fomcDateString && (
                   <span className="text-sm text-[#5c748a] whitespace-nowrap">{fomcDateString}</span>
               )}
             </header>
-            <div className="px-4 sm:px-6 md:px-10 lg:px-20 flex flex-1 justify-center py-5"> {/* Adjusted padding here */}
+            <div className="px-3 sm:px-5 md:px-8 lg:px-16 flex flex-1 justify-center py-5"> {/* Adjusted padding here */}
               <div className="layout-content-container flex flex-col max-w-[960px] flex-1 md:max-w-4xl lg:max-w-5xl">
                 
                 <h2 className="text-[#101518] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">Quick Actions</h2>
