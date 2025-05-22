@@ -1,3 +1,4 @@
+
 'use client';
 
 import {useState, useEffect, useRef} from 'react';
@@ -378,11 +379,7 @@ export default function Home() {
     }, []);
 
     const sendNotification = (coin: string, price: number) => {
-        const notificationTitle = 'Price Alert!';
-        const notificationOptions = {
-            body: `${coin} is within your waiting price range at $${price.toFixed(2)}`,
-            icon: '/favicon.ico', // This may not render if favicon.ico is not present
-        };
+        const commonIcon = '/favicon.ico'; 
     
         console.log("Attempting to send notification...");
     
@@ -390,11 +387,16 @@ export default function Home() {
             if (Notification.permission === 'granted') {
                 console.log("Notification permission granted.");
                 if (isClientMobile) {
+                    const mobileNotificationTitle = 'Price Alert!';
+                    const mobileNotificationOptions = {
+                        body: `${coin} is within your waiting price range at $${price.toFixed(2)}`,
+                        icon: commonIcon,
+                    };
                     console.log("Mobile device detected. Using Service Worker for notification.");
                     if ('serviceWorker' in navigator && navigator.serviceWorker.controller) { 
                         navigator.serviceWorker.ready.then(registration => {
                             console.log("Service Worker is ready. Attempting to show notification.");
-                            registration.showNotification(notificationTitle, notificationOptions)
+                            registration.showNotification(mobileNotificationTitle, mobileNotificationOptions)
                                 .then(() => console.log('Notification sent via Service Worker.'))
                                 .catch(err => console.error('Service Worker notification error:', err));
                         }).catch(error => {
@@ -403,17 +405,23 @@ export default function Home() {
                     } else {
                         console.warn('Service Worker not available, not ready, or not controlling the page for mobile notification. Trying direct Notification API.');
                          try {
-                            new Notification(notificationTitle, notificationOptions); 
+                            new Notification(mobileNotificationTitle, mobileNotificationOptions); 
                             console.log('Fallback: Notification sent via Notification API on mobile.');
                         } catch (err) {
                             console.error('Fallback: Mobile Notification API error:', err);
                         }
                     }
-                } else {
+                } else { // Desktop logic
                     console.log("Desktop device detected. Using Notification API.");
+                    const desktopNotificationTitle = `Desktop Alert: ${coin} Price Update!`; 
+                    const desktopNotificationOptions = {
+                        body: `Heads up! ${coin} is now $${price.toFixed(2)} and has entered your specified alert range.`,
+                        icon: commonIcon, 
+                        // requireInteraction: true, // Optional: makes notification sticky on some systems
+                    };
                     try {
-                        new Notification(notificationTitle, notificationOptions);
-                        console.log('Notification sent via Notification API.');
+                        new Notification(desktopNotificationTitle, desktopNotificationOptions);
+                        console.log('Notification sent via Notification API for desktop.');
                     } catch (err) {
                         console.error('Desktop Notification API error:', err);
                     }
