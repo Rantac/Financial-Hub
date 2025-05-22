@@ -1,20 +1,22 @@
 import type {Metadata} from 'next';
-import { Inter, Roboto_Mono } from 'next/font/google'; // Replaced Geist_Sans and Geist_Mono
+import { Work_Sans, Noto_Sans } from 'next/font/google'; // Changed fonts
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 
-const inter = Inter({
-  variable: '--font-inter', // Updated variable name
+const workSans = Work_Sans({ // Changed font
+  variable: '--font-work-sans', // Changed variable
   subsets: ['latin'],
+  weight: ['400', '500', '700', '900'] // Added weights from new design
 });
 
-const robotoMono = Roboto_Mono({
-  variable: '--font-roboto-mono', // Updated variable name
+const notoSans = Noto_Sans({ // Changed font
+  variable: '--font-noto-sans', // Changed variable
   subsets: ['latin'],
+  weight: ['400', '500', '700', '900'] // Added weights from new design
 });
 
 export const metadata: Metadata = {
-  title: 'TradeFlow',
+  title: 'Finance Hub', // Updated title
   description: 'Manage tasks, calculate trades, and monitor crypto markets.',
 };
 
@@ -25,7 +27,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${robotoMono.variable} antialiased`}> {/* Updated font variables */}
+      <body className={`${workSans.variable} ${notoSans.variable} font-sans antialiased`}> {/* Updated font variables and added base font-sans */}
         {children}
         <Toaster />
       </body>
