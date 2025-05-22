@@ -577,23 +577,23 @@ export default function Home() {
                             <div className="md:w-1/2 space-y-5">
                                 <div>
                                     <label htmlFor="accountBalance" className="block text-sm font-medium text-[#5c748a] mb-1">Account Balance ($)</label>
-                                    <Input type="number" id="accountBalance" placeholder="" value={accountBalance} onChange={(e) => setAccountBalance(e.target.value)} className="form-input w-1/2 rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
+                                    <Input type="number" id="accountBalance" placeholder="" value={accountBalance} onChange={(e) => setAccountBalance(e.target.value)} className="form-input w-full rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
                                 </div>
                                 <div>
                                     <label htmlFor="cryptoEntry" className="block text-sm font-medium text-[#5c748a] mb-1">Entry Price</label>
-                                    <Input type="number" id="cryptoEntry" placeholder="" value={cryptoEntry} onChange={(e) => setCryptoEntry(e.target.value)} className="form-input w-1/2 rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
+                                    <Input type="number" id="cryptoEntry" placeholder="" value={cryptoEntry} onChange={(e) => setCryptoEntry(e.target.value)} className="form-input w-full rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
                                 </div>
                                 <div>
                                     <label htmlFor="cryptoSL" className="block text-sm font-medium text-[#5c748a] mb-1">Stop Loss Price</label>
-                                    <Input type="number" id="cryptoSL" placeholder="" value={cryptoSL} onChange={(e) => setCryptoSL(e.target.value)} className="form-input w-1/2 rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
+                                    <Input type="number" id="cryptoSL" placeholder="" value={cryptoSL} onChange={(e) => setCryptoSL(e.target.value)} className="form-input w-full rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
                                 </div>
                                 <div>
                                     <label htmlFor="cryptoTP" className="block text-sm font-medium text-[#5c748a] mb-1">Take Profit Price (Optional)</label>
-                                    <Input type="number" id="cryptoTP" placeholder="" value={cryptoTP} onChange={(e) => setCryptoTP(e.target.value)} className="form-input w-1/2 rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
+                                    <Input type="number" id="cryptoTP" placeholder="" value={cryptoTP} onChange={(e) => setCryptoTP(e.target.value)} className="form-input w-full rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
                                 </div>
                                 <div>
                                     <label htmlFor="riskPercentage" className="block text-sm font-medium text-[#5c748a] mb-1">Risk Percentage (%)</label>
-                                    <Input type="number" id="riskPercentage" placeholder="" value={riskPercentage} onChange={(e) => setRiskPercentage(e.target.value)} className="form-input w-1/2 rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
+                                    <Input type="number" id="riskPercentage" placeholder="" value={riskPercentage} onChange={(e) => setRiskPercentage(e.target.value)} className="form-input w-full rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
                                 </div>
                             </div>
 
@@ -694,4 +694,3 @@ export default function Home() {
         </div>
     );
 }
-
