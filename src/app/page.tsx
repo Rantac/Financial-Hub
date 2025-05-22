@@ -386,7 +386,7 @@ export default function Home() {
     }, [activeSection]);
 
     const sendNotification = (coin: string, price: number) => {
-        const commonIcon = '/favicon.ico'; 
+        const commonIcon = '/favicon.ico';
     
         console.log("Attempting to send notification...");
     
@@ -394,9 +394,9 @@ export default function Home() {
             if (Notification.permission === 'granted') {
                 console.log("Notification permission granted.");
                 if (isClientMobile) {
-                    const mobileNotificationTitle = 'Mobile Price Alert!';
+                    const mobileNotificationTitle = 'Finance Hub Mobile Alert!';
                     const mobileNotificationOptions = {
-                        body: `${coin} is within your set range at $${price.toFixed(2)}. Check the app!`,
+                        body: `${coin} is within your set range at $${price.toFixed(2)}. Time to check!`,
                         icon: commonIcon,
                     };
                     console.log("Mobile device detected. Using Service Worker for notification.");
@@ -420,9 +420,9 @@ export default function Home() {
                     }
                 } else { 
                     console.log("Desktop device detected. Using Notification API.");
-                    const desktopNotificationTitle = `Desktop Finance Hub: ${coin} Alert!`; 
+                    const desktopNotificationTitle = `Finance Hub Desktop: ${coin} Alert!`; 
                     const desktopNotificationOptions = {
-                        body: `Time to check your charts! ${coin} is now $${price.toFixed(2)}, entering your alert range.`,
+                        body: `Heads up! ${coin} is now $${price.toFixed(2)}, entering your alert range. Check your charts.`,
                         icon: commonIcon, 
                     };
                     try {
@@ -578,19 +578,19 @@ export default function Home() {
                             </div>
                             <div>
                                 <label htmlFor="cryptoEntry" className="block text-sm font-medium text-[#5c748a] mb-1">Entry Price</label>
-                                <Input type="number" id="cryptoEntry" placeholder="e.g., 50000" value={cryptoEntry} onChange={(e) => setCryptoEntry(e.target.value)} className="form-input w-full rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
+                                <Input type="number" id="cryptoEntry" placeholder="" value={cryptoEntry} onChange={(e) => setCryptoEntry(e.target.value)} className="form-input w-full rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
                             </div>
                             <div>
                                 <label htmlFor="cryptoSL" className="block text-sm font-medium text-[#5c748a] mb-1">Stop Loss Price</label>
-                                <Input type="number" id="cryptoSL" placeholder="e.g., 49000" value={cryptoSL} onChange={(e) => setCryptoSL(e.target.value)} className="form-input w-full rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
+                                <Input type="number" id="cryptoSL" placeholder="" value={cryptoSL} onChange={(e) => setCryptoSL(e.target.value)} className="form-input w-full rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
                             </div>
                             <div>
                                 <label htmlFor="cryptoTP" className="block text-sm font-medium text-[#5c748a] mb-1">Take Profit Price (Optional)</label>
-                                <Input type="number" id="cryptoTP" placeholder="e.g., 52000" value={cryptoTP} onChange={(e) => setCryptoTP(e.target.value)} className="form-input w-full rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
+                                <Input type="number" id="cryptoTP" placeholder="" value={cryptoTP} onChange={(e) => setCryptoTP(e.target.value)} className="form-input w-full rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
                             </div>
                             <div>
                                 <label htmlFor="riskPercentage" className="block text-sm font-medium text-[#5c748a] mb-1">Risk Percentage (%)</label>
-                                <Input type="number" id="riskPercentage" placeholder="e.g., 1 or 2" value={riskPercentage} onChange={(e) => setRiskPercentage(e.target.value)} className="form-input w-full rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
+                                <Input type="number" id="riskPercentage" placeholder="" value={riskPercentage} onChange={(e) => setRiskPercentage(e.target.value)} className="form-input w-full rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
                             </div>
                             {(positionSize !== null || cryptoRiskRewardRatio !== null) && (
                                 <div className="space-y-2 mt-4 p-4 bg-[#eaedf1] rounded-xl">
@@ -618,7 +618,7 @@ export default function Home() {
                                     <p className="text-lg text-[#101518] font-semibold">{coinSymbol}: <span className="font-normal text-[#5c748a]">{coinPrices[coinSymbol] !== null ? `$${coinPrices[coinSymbol]!.toFixed(2)}` : 'Loading...'}</span></p>
                                     <Input
                                         type="text"
-                                        placeholder="Set alert range (e.g., 20000-21000)"
+                                        placeholder=""
                                         className="form-input w-full rounded-xl bg-white border-[#d4dce2] h-10 px-3 text-[#101518]"
                                         value={waitingPrices[coinSymbol] || ''}
                                         onChange={(e) => setWaitingPrices(prev => ({...prev, [coinSymbol]: e.target.value}))}
@@ -654,7 +654,7 @@ export default function Home() {
               )}
             </header>
             <div className="px-4 sm:px-10 md:px-20 lg:px-40 flex flex-1 justify-center py-5">
-              <div className="layout-content-container flex flex-col max-w-[960px] flex-1">
+              <div className="layout-content-container flex flex-col max-w-[960px] flex-1 md:max-w-4xl lg:max-w-5xl">
                 
                 <h2 className="text-[#101518] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">Quick Actions</h2>
                 <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-3 p-4">
