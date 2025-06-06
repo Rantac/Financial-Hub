@@ -3,7 +3,7 @@
 
 import {useState, useEffect, useRef} from 'react';
 import { Button } from '@/components/ui/button';
-import { Check, Circle, Trash } from 'lucide-react';
+import { Check, Circle, Trash, RefreshCw } from 'lucide-react'; // Added RefreshCw
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { useToast } from "@/hooks/use-toast";
@@ -326,59 +326,59 @@ export default function Home() {
         calculateCryptoValues();
     }, [cryptoEntry, cryptoSL, cryptoTP, riskPercentage, accountBalance]);
 
-    useEffect(() => {
-        const fetchMarketData = async () => {
-            setLoadingMarket(true);
-            setErrorMarket(null); 
-            try {
-                const url = 'https://coinranking1.p.rapidapi.com/coins?referenceCurrencyUuid=yhjMzLPhuIDl&timePeriod=24h&tiers=1&orderBy=marketCap&orderDirection=desc&limit=50&offset=0';
-                const options = {
-                    method: 'GET',
-                    headers: {
-                        'x-rapidapi-key': 'f0ad4a4797msh17ff46665ba9c66p1e5399jsnd422cb1c94df',
-                        'x-rapidapi-host': 'coinranking1.p.rapidapi.com'
-                    }
-                };
-                const response = await fetch(url, options);
-                if (!response.ok) {
-                    const errorMessage = `HTTP error! status: ${response.status}`;
-                    setErrorMarket(errorMessage);
-                    console.error("Market Price Fetch Error:", errorMessage); 
-                    throw new Error(errorMessage);
+    const fetchMarketData = async () => {
+        setLoadingMarket(true);
+        setErrorMarket(null); 
+        try {
+            const url = 'https://coinranking1.p.rapidapi.com/coins?referenceCurrencyUuid=yhjMzLPhuIDl&timePeriod=24h&tiers=1&orderBy=marketCap&orderDirection=desc&limit=50&offset=0';
+            const options = {
+                method: 'GET',
+                headers: {
+                    'x-rapidapi-key': 'f0ad4a4797msh17ff46665ba9c66p1e5399jsnd422cb1c94df',
+                    'x-rapidapi-host': 'coinranking1.p.rapidapi.com'
                 }
-                const result = await response.json();
-                
-                const coinsToFetch: CoinSymbol[] = ["BTC", "ETH", "BNB", "SOL", "TON", "LTC", "XRP", "XLM", "LINK"];
-                const newCoinPrices: Record<CoinSymbol, number | null> = {...initialCoinPrices};
-                let anErrorOccurred = false;
-
-                coinsToFetch.forEach(symbol => {
-                    const coinData = result.data.coins.find((c: any) => c.symbol === symbol);
-                    if (coinData && coinData.price) { 
-                        newCoinPrices[symbol] = parseFloat(coinData.price);
-                    } else {
-                        console.error(`${symbol} price not found or invalid in API response.`);
-                        anErrorOccurred = true;
-                    }
-                });
-                setCoinPrices(newCoinPrices);
-
-                if (anErrorOccurred) {
-                    setErrorMarket(prevError => {
-                        const newErrorMessage = "Some coin prices not found or invalid.";
-                        if (prevError && !prevError.includes(newErrorMessage)) return `${prevError}, ${newErrorMessage}`;
-                        return newErrorMessage;
-                    });
-                }
-
-            } catch (e: any) {
-                setErrorMarket(e.message);
-                console.error("Market Price Fetch API Error:", e);
-            } finally {
-                setLoadingMarket(false);
+            };
+            const response = await fetch(url, options);
+            if (!response.ok) {
+                const errorMessage = `HTTP error! status: ${response.status}`;
+                setErrorMarket(errorMessage);
+                console.error("Market Price Fetch Error:", errorMessage); 
+                throw new Error(errorMessage);
             }
-        };
+            const result = await response.json();
+            
+            const coinsToFetch: CoinSymbol[] = ["BTC", "ETH", "BNB", "SOL", "TON", "LTC", "XRP", "XLM", "LINK"];
+            const newCoinPrices: Record<CoinSymbol, number | null> = {...initialCoinPrices};
+            let anErrorOccurred = false;
 
+            coinsToFetch.forEach(symbol => {
+                const coinData = result.data.coins.find((c: any) => c.symbol === symbol);
+                if (coinData && coinData.price) { 
+                    newCoinPrices[symbol] = parseFloat(coinData.price);
+                } else {
+                    console.error(`${symbol} price not found or invalid in API response.`);
+                    anErrorOccurred = true;
+                }
+            });
+            setCoinPrices(newCoinPrices);
+
+            if (anErrorOccurred) {
+                setErrorMarket(prevError => {
+                    const newErrorMessage = "Some coin prices not found or invalid.";
+                    if (prevError && !prevError.includes(newErrorMessage)) return `${prevError}, ${newErrorMessage}`;
+                    return newErrorMessage;
+                });
+            }
+
+        } catch (e: any) {
+            setErrorMarket(e.message);
+            console.error("Market Price Fetch API Error:", e);
+        } finally {
+            setLoadingMarket(false);
+        }
+    };
+
+    useEffect(() => {
         if (activeSection === 'market') {
           fetchMarketData();
           const intervalId = setInterval(fetchMarketData, 1200000); 
@@ -539,7 +539,6 @@ export default function Home() {
                     <div className="p-4 space-y-6">
                         <h2 className="text-[#101518] text-[22px] font-bold leading-tight tracking-[-0.015em] pb-3">Pips Calculator</h2>
                         <div className="flex flex-col md:flex-row gap-6">
-                             {/* Inputs Section (Left) */}
                             <div className="md:w-1/2 space-y-5">
                                 <div>
                                     <label htmlFor="stopLoss" className="block text-sm font-medium text-[#5c748a] mb-1">Stop Loss</label>
@@ -560,7 +559,6 @@ export default function Home() {
                                     </select>
                                 </div>
                             </div>
-                            {/* Results Section (Right) */}
                             {(pipsOfRisk !== null || pipsOfReward !== null || riskRewardRatio !== null) && (
                                  <div className="md:w-1/2 flex items-start">
                                     <div className="w-full space-y-2 p-4 bg-[#eaedf1] rounded-xl">
@@ -579,7 +577,6 @@ export default function Home() {
                     <div className="p-4 space-y-6">
                         <h2 className="text-[#101518] text-[22px] font-bold leading-tight tracking-[-0.015em] pb-3">Crypto Position Size Calculator</h2>
                         <div className="flex flex-col md:flex-row gap-6">
-                            {/* Inputs Section (Left) */}
                             <div className="md:w-1/2 space-y-5">
                                 <div>
                                     <label htmlFor="accountBalance" className="block text-sm font-medium text-[#5c748a] mb-1">Account Balance ($)</label>
@@ -603,7 +600,6 @@ export default function Home() {
                                 </div>
                             </div>
 
-                            {/* Results Section (Right) */}
                             {(positionSize !== null || cryptoRiskRewardRatio !== null) && (
                                 <div className="md:w-1/2 flex items-start">
                                     <div className="w-full space-y-2 p-4 bg-[#eaedf1] rounded-xl">
@@ -623,7 +619,13 @@ export default function Home() {
             case 'market':
                 return (
                     <div className="p-4 space-y-6">
-                        <h2 className="text-[#101518] text-[22px] font-bold leading-tight tracking-[-0.015em] pb-3">Real-Time Market Prices</h2>
+                        <div className="flex justify-between items-center pb-3">
+                            <h2 className="text-[#101518] text-[22px] font-bold leading-tight tracking-[-0.015em]">Real-Time Market Prices</h2>
+                            <Button onClick={fetchMarketData} variant="outline" size="icon" disabled={loadingMarket} className="rounded-xl">
+                                <RefreshCw className={cn("h-4 w-4", loadingMarket && "animate-spin")} />
+                                <span className="sr-only">Refresh Market Data</span>
+                            </Button>
+                        </div>
                         {loadingMarket && <p className="text-center text-[#5c748a]">Loading market data...</p>}
                         {errorMarket && <p className="text-center text-red-500">{errorMarket}</p>}
                         {!loadingMarket && !errorMarket && (
@@ -687,7 +689,7 @@ export default function Home() {
                   <span className="text-sm text-[#5c748a] whitespace-nowrap">{fomcDateString}</span>
               )}
             </header>
-            <div className="px-1 sm:px-2 md:px-4 lg:px-8 flex flex-1 justify-center py-5"> {/* Adjusted padding */}
+            <div className="px-1 sm:px-2 md:px-4 lg:px-8 flex flex-1 justify-center py-5">
               <div className="layout-content-container flex flex-col max-w-[960px] flex-1">
                 
                 <h2 className="text-[#101518] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">Quick Actions</h2>
