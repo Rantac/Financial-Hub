@@ -421,7 +421,7 @@ export default function Home() {
                     }
                 } else { 
                     console.log("Desktop device detected. Using Notification API.");
-                    const desktopNotificationTitle = `Desktop Alert: ${coin} Price Update!`; 
+                    const desktopNotificationTitle = `Financial Hub Alert: ${coin} Price Update!`; 
                     const desktopNotificationOptions = {
                         body: `${coin} has reached $${price.toFixed(2)} and is within your specified alert range. Consider reviewing your position.`, 
                         icon: commonIcon, 
@@ -628,24 +628,24 @@ export default function Home() {
                         {errorMarket && <p className="text-center text-red-500">{errorMarket}</p>}
                         {!loadingMarket && !errorMarket && (
                              <div className="overflow-x-auto rounded-xl border border-[#d4dce2] bg-gray-50">
-                                <table className="w-full min-w-[600px]">
+                                <table className="w-full min-w-[600px] table-fixed">
                                     <thead className="bg-[#eaedf1]">
                                         <tr>
-                                            <th className="px-4 py-3 text-left text-[#101518] text-sm font-medium leading-normal w-1/5">Name</th>
-                                            <th className="px-4 py-3 text-left text-[#101518] text-sm font-medium leading-normal w-1/5">Price</th>
-                                            <th className="px-4 py-3 text-left text-[#101518] text-sm font-medium leading-normal w-3/5">Set Alert Range & Status</th>
+                                            <th className="px-4 py-3 text-left text-[#101518] text-sm font-medium leading-normal w-1/3">Name</th>
+                                            <th className="px-4 py-3 text-left text-[#101518] text-sm font-medium leading-normal w-1/3">Price</th>
+                                            <th className="px-4 py-3 text-left text-[#101518] text-sm font-medium leading-normal w-1/3">Set Alert Range & Status</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {(Object.keys(coinPrices) as CoinSymbol[]).map((coinSymbol) => (
                                             <tr key={coinSymbol} className="border-t border-[#d4dce2]">
-                                                <td className="h-[72px] px-4 py-2 text-[#101518] text-sm font-normal leading-normal">
+                                                <td className="h-[72px] px-4 py-2 text-[#101518] text-sm font-normal leading-normal w-1/3">
                                                     {coinSymbol}
                                                 </td>
-                                                <td className="h-[72px] px-4 py-2 text-[#5c748a] text-sm font-normal leading-normal">
+                                                <td className="h-[72px] px-4 py-2 text-[#5c748a] text-sm font-normal leading-normal w-1/3">
                                                     {coinPrices[coinSymbol] !== null ? `$${coinPrices[coinSymbol]!.toFixed(2)}` : 'Loading...'}
                                                 </td>
-                                                <td className="h-[72px] px-4 py-2 text-sm font-normal leading-normal">
+                                                <td className="h-[72px] px-4 py-2 text-sm font-normal leading-normal w-1/3">
                                                     <Input
                                                         type="text"
                                                         placeholder=""
@@ -687,7 +687,7 @@ export default function Home() {
                   <span className="text-sm text-[#5c748a] whitespace-nowrap">{fomcDateString}</span>
               )}
             </header>
-            <div className="px-1 sm:px-2 md:px-4 lg:px-8 flex flex-1 justify-center py-5">
+            <div className="px-1 sm:px-2 md:px-4 lg:px-8 flex flex-1 justify-center py-5"> {/* Adjusted padding */}
               <div className="layout-content-container flex flex-col max-w-[960px] flex-1">
                 
                 <h2 className="text-[#101518] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">Quick Actions</h2>
