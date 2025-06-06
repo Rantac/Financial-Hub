@@ -3,7 +3,7 @@
 
 import {useState, useEffect, useRef} from 'react';
 import { Button } from '@/components/ui/button';
-import { Check, Circle, Trash, RefreshCw } from 'lucide-react'; // Added RefreshCw
+import { Check, Circle, Trash, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { useToast } from "@/hooks/use-toast";
@@ -621,9 +621,15 @@ export default function Home() {
                     <div className="p-4 space-y-6">
                         <div className="flex justify-between items-center pb-3">
                             <h2 className="text-[#101518] text-[22px] font-bold leading-tight tracking-[-0.015em]">Real-Time Market Prices</h2>
-                            <Button onClick={fetchMarketData} variant="outline" size="icon" disabled={loadingMarket} className="rounded-xl">
-                                <RefreshCw className={cn("h-4 w-4", loadingMarket && "animate-spin")} />
-                                <span className="sr-only">Refresh Market Data</span>
+                            <Button
+                                onClick={fetchMarketData}
+                                variant="secondary"
+                                size="sm"
+                                disabled={loadingMarket}
+                                className="rounded-full"
+                            >
+                                <RefreshCw className={cn("mr-2 h-4 w-4", loadingMarket && "animate-spin")} />
+                                Refresh
                             </Button>
                         </div>
                         {loadingMarket && <p className="text-center text-[#5c748a]">Loading market data...</p>}
@@ -689,7 +695,7 @@ export default function Home() {
                   <span className="text-sm text-[#5c748a] whitespace-nowrap">{fomcDateString}</span>
               )}
             </header>
-            <div className="px-1 sm:px-2 md:px-4 lg:px-8 flex flex-1 justify-center py-5">
+            <div className="px-1 sm:px-2 md:px-4 lg:px-8 flex flex-1 justify-center py-5"> {/* Reduced horizontal padding by 40% */}
               <div className="layout-content-container flex flex-col max-w-[960px] flex-1">
                 
                 <h2 className="text-[#101518] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">Quick Actions</h2>
