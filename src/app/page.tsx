@@ -626,26 +626,46 @@ export default function Home() {
                         <h2 className="text-[#101518] text-[22px] font-bold leading-tight tracking-[-0.015em] pb-3">Real-Time Market Prices</h2>
                         {loadingMarket && <p className="text-center text-[#5c748a]">Loading market data...</p>}
                         {errorMarket && <p className="text-center text-red-500">{errorMarket}</p>}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {(Object.keys(coinPrices) as CoinSymbol[]).map((coinSymbol) => (
-                                <div key={coinSymbol} className="space-y-2 p-4 bg-[#eaedf1] rounded-xl">
-                                    <p className="text-lg text-[#101518] font-semibold">{coinSymbol}: <span className="font-normal text-[#5c748a]">{coinPrices[coinSymbol] !== null ? `$${coinPrices[coinSymbol]!.toFixed(2)}` : 'Loading...'}</span></p>
-                                    <Input
-                                        type="text"
-                                        placeholder=""
-                                        className="form-input w-full rounded-xl bg-white border-[#d4dce2] h-10 px-3 text-[#101518]"
-                                        value={waitingPrices[coinSymbol] || ''}
-                                        onChange={(e) => setWaitingPrices(prev => ({...prev, [coinSymbol]: e.target.value}))}
-                                    />
-                                    {waitingPrices[coinSymbol] && coinPrices[coinSymbol] && getStatus(coinSymbol) && (
-                                        <p className="mt-1 text-sm text-[#101518]">Status: <span className={cn(
-                                            getStatus(coinSymbol) === 'Within' ? 'text-green-600' : 
-                                            getStatus(coinSymbol) === 'Above' || getStatus(coinSymbol) === 'Below' ? 'text-red-600' : 'text-[#5c748a]'
-                                        )}>{getStatus(coinSymbol)}</span></p>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
+                        {!loadingMarket && !errorMarket && (
+                             <div className="overflow-x-auto rounded-xl border border-[#d4dce2] bg-gray-50">
+                                <table className="w-full min-w-[600px]">
+                                    <thead className="bg-[#eaedf1]">
+                                        <tr>
+                                            <th className="px-4 py-3 text-left text-[#101518] text-sm font-medium leading-normal w-1/5">Name</th>
+                                            <th className="px-4 py-3 text-left text-[#101518] text-sm font-medium leading-normal w-1/5">Price</th>
+                                            <th className="px-4 py-3 text-left text-[#101518] text-sm font-medium leading-normal w-3/5">Set Alert Range & Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {(Object.keys(coinPrices) as CoinSymbol[]).map((coinSymbol) => (
+                                            <tr key={coinSymbol} className="border-t border-[#d4dce2]">
+                                                <td className="h-[72px] px-4 py-2 text-[#101518] text-sm font-normal leading-normal">
+                                                    {coinSymbol}
+                                                </td>
+                                                <td className="h-[72px] px-4 py-2 text-[#5c748a] text-sm font-normal leading-normal">
+                                                    {coinPrices[coinSymbol] !== null ? `$${coinPrices[coinSymbol]!.toFixed(2)}` : 'Loading...'}
+                                                </td>
+                                                <td className="h-[72px] px-4 py-2 text-sm font-normal leading-normal">
+                                                    <Input
+                                                        type="text"
+                                                        placeholder=""
+                                                        className="form-input w-full rounded-xl bg-white border-[#d4dce2] h-10 px-3 text-[#101518] mb-1"
+                                                        value={waitingPrices[coinSymbol] || ''}
+                                                        onChange={(e) => setWaitingPrices(prev => ({...prev, [coinSymbol]: e.target.value}))}
+                                                    />
+                                                    {waitingPrices[coinSymbol] && coinPrices[coinSymbol] && getStatus(coinSymbol) && (
+                                                        <p className="mt-1 text-xs text-[#101518]">Status: <span className={cn(
+                                                            getStatus(coinSymbol) === 'Within' ? 'text-green-600' : 
+                                                            getStatus(coinSymbol) === 'Above' || getStatus(coinSymbol) === 'Below' ? 'text-red-600' : 'text-[#5c748a]'
+                                                        )}>{getStatus(coinSymbol)}</span></p>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
                     </div>
                 );
             default:
@@ -667,7 +687,7 @@ export default function Home() {
                   <span className="text-sm text-[#5c748a] whitespace-nowrap">{fomcDateString}</span>
               )}
             </header>
-            <div className="px-1 sm:px-2 md:px-4 lg:px-8 flex flex-1 justify-center py-5"> {/* Reduced padding */}
+            <div className="px-1 sm:px-2 md:px-4 lg:px-8 flex flex-1 justify-center py-5">
               <div className="layout-content-container flex flex-col max-w-[960px] flex-1">
                 
                 <h2 className="text-[#101518] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">Quick Actions</h2>
@@ -700,3 +720,4 @@ export default function Home() {
         </div>
     );
 }
+
