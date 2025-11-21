@@ -338,6 +338,7 @@ export default function Home() {
             setConversionPair('');
         }
         calculateLots();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [lotsAccountBalance, lotsRiskPct, lotsPair, lotsEntryPrice, lotsSlPrice, lotsTpPrice, lotsConversionPrice]);
 
     const handlePairChange = (value: string) => {
@@ -401,6 +402,7 @@ export default function Home() {
     
     useEffect(() => {
         calculateCryptoValues();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [cryptoEntry, cryptoSL, cryptoTP, riskPercentage, accountBalance]);
 
     const fetchMarketData = async () => {
@@ -647,8 +649,27 @@ export default function Home() {
                                             </SelectGroup>
                                             <SelectGroup>
                                                 <SelectItem value="EURGBP">EUR/GBP</SelectItem>
+                                                <SelectItem value="EURCHF">EUR/CHF</SelectItem>
+                                                <SelectItem value="EURCAD">EUR/CAD</SelectItem>
+                                                <SelectItem value="EURAUD">EUR/AUD</SelectItem>
+                                                <SelectItem value="EURNZD">EUR/NZD</SelectItem>
                                                 <SelectItem value="EURJPY">EUR/JPY</SelectItem>
+                                                <SelectItem value="GBPCHF">GBP/CHF</SelectItem>
+                                                <SelectItem value="GBPCAD">GBP/CAD</SelectItem>
+                                                <SelectItem value="GBPAUD">GBP/AUD</SelectItem>
+                                                <SelectItem value="GBPNZD">GBP/NZD</SelectItem>
                                                 <SelectItem value="GBPJPY">GBP/JPY</SelectItem>
+                                                <SelectItem value="AUDCAD">AUD/CAD</SelectItem>
+                                                <SelectItem value="AUDCHF">AUD/CHF</SelectItem>
+                                                <SelectItem value="AUDNZD">AUD/NZD</SelectItem>
+                                                <SelectItem value="AUDJPY">AUD/JPY</SelectItem>
+                                                <SelectItem value="CADCHF">CAD/CHF</SelectItem>
+                                                <SelectItem value="CADJPY">CAD/JPY</SelectItem>
+                                                <SelectItem value="NZDJPY">NZD/JPY</SelectItem>
+                                                <SelectItem value="CHFJPY">CHF/JPY</SelectItem>
+                                            </SelectGroup>
+                                             <SelectGroup>
+                                                <SelectItem value="USDSGD">USD/SGD</SelectItem>
                                             </SelectGroup>
                                              <SelectGroup>
                                                 <SelectItem value="XAUUSD">XAU/USD (Gold)</SelectItem>
@@ -857,6 +878,3 @@ export default function Home() {
         </div>
     );
 }
-
-
-    
