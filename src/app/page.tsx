@@ -752,7 +752,7 @@ export default function Home() {
                                     <p className="text-lg font-semibold text-[#101518]">Result:</p>
                                     <div className="flex justify-between items-center pb-4 border-b border-gray-300">
                                         <span className="text-sm font-medium text-[#5c748a]">Standard Lot Size</span>
-                                        <span className="text-3xl font-bold text-[#101518]">{lotsResult.standardLots.toFixed(2)}</span>
+                                        <span className="text-3xl font-bold text-[#101518]">{lotsResult.standardLots.toFixed(4)}</span>
                                     </div>
                                     <div className="space-y-2 pt-2">
                                         <div className="flex justify-between items-center text-sm">
@@ -837,7 +837,7 @@ export default function Home() {
                         {errorMarket && <p className="text-center text-red-500">{errorMarket}</p>}
                         {!loadingMarket && !errorMarket && (
                              <div className="overflow-x-auto rounded-xl border border-[#d4dce2] bg-gray-50">
-                                <table className="w-full min-w-[600px] table-fixed">
+                                <table className="w-full table-fixed">
                                     <thead className="bg-[#eaedf1]">
                                         <tr>
                                             <th className="px-4 py-3 text-left text-[#101518] text-sm font-medium leading-normal w-1/3">Name</th>
@@ -929,5 +929,7 @@ export default function Home() {
         </div>
     );
 }
+
+    
 
     
