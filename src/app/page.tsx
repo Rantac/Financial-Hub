@@ -1,7 +1,7 @@
 
 'use client';
 
-import {useState, useEffect, useRef} from 'react';
+import {useState, useEffect, useRef, useCallback} from 'react';
 import { Button } from '@/components/ui/button';
 import { Check, Circle, Trash, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -83,6 +83,8 @@ export default function Home() {
     });
     const [calculationMode, setCalculationMode] = useState('Direct');
     const [conversionPair, setConversionPair] = useState('');
+    const [isFetchingConversion, setIsFetchingConversion] = useState(false);
+    const [conversionError, setConversionError] = useState<string | null>(null);
 
 
     // Crypto Position Sizing Calculator State
@@ -275,7 +277,7 @@ export default function Home() {
         return 'Cross';
     };
 
-    const calculateLots = () => {
+    const calculateLots = useCallback(() => {
         const { base, quote, pipSize } = getPairDetails(lotsPair);
         const mode = determineCalculationMode('USD', base, quote);
 
@@ -286,18 +288,16 @@ export default function Home() {
         const tp = parseFloat(lotsTpPrice) || 0;
         const convPrice = parseFloat(lotsConversionPrice) || 0;
 
+        if (balance === 0 || riskPct === 0 || price === 0 || sl === 0) {
+            setLotsResult({ standardLots: 0, riskPips: 0, rewardPips: 0, rRatio: 0 });
+            return;
+        }
+
         const riskAmount = balance * (riskPct / 100);
         const stdLotSize = 100000;
 
-        let slPips = 0;
-        if (price > 0 && sl > 0) {
-            slPips = Math.abs(price - sl) / pipSize;
-        }
-
-        let tpPips = 0;
-        if (price > 0 && tp > 0) {
-            tpPips = Math.abs(tp - price) / pipSize;
-        }
+        let slPips = Math.abs(price - sl) / pipSize;
+        let tpPips = tp > 0 ? Math.abs(tp - price) / pipSize : 0;
 
         let pipValueStandard = 0;
         const rawPipValueQuote = pipSize * stdLotSize;
@@ -305,9 +305,11 @@ export default function Home() {
         if (mode === 'Direct') {
             pipValueStandard = rawPipValueQuote;
         } else if (mode === 'Indirect') {
-            if (price > 0) pipValueStandard = rawPipValueQuote / price;
-        } else if (mode === 'Cross') { // Cross
-            pipValueStandard = rawPipValueQuote * convPrice;
+             if (price > 0) pipValueStandard = rawPipValueQuote / price;
+        } else if (mode === 'Cross') {
+            if (convPrice > 0) {
+                pipValueStandard = rawPipValueQuote * convPrice;
+            }
         }
         
         let lots = 0;
@@ -326,20 +328,62 @@ export default function Home() {
             rewardPips: tpPips,
             rRatio: rRatio,
         });
-    };
+    }, [lotsPair, lotsAccountBalance, lotsRiskPct, lotsEntryPrice, lotsSlPrice, lotsTpPrice, lotsConversionPrice]);
+
     
+    const fetchConversionRate = useCallback(async (pairForApi: string) => {
+        setIsFetchingConversion(true);
+        setConversionError(null);
+        setLotsConversionPrice('');
+        const apiKey = 'd4g3l59r01qgiieo4v7gd4g3l59r01qgiieo4v80';
+        const url = `https://finnhub.io/api/v1/quote?symbol=OANDA:${pairForApi}&token=${apiKey}`;
+
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`API request failed with status ${response.status}`);
+            }
+            const data = await response.json();
+            if (data.c) {
+                setLotsConversionPrice(data.c.toString());
+            } else {
+                throw new Error('Invalid data format from API.');
+            }
+        } catch (error: any) {
+            setConversionError(error.message);
+            toast({
+                title: 'API Error',
+                description: `Could not fetch exchange rate for ${pairForApi}.`,
+                variant: 'destructive',
+            });
+        } finally {
+            setIsFetchingConversion(false);
+        }
+    }, [toast]);
+
     useEffect(() => {
         const { base, quote } = getPairDetails(lotsPair);
         const mode = determineCalculationMode('USD', base, quote);
         setCalculationMode(mode);
+        setConversionError(null);
+
         if (mode === 'Cross') {
-            setConversionPair(`${quote}USD`);
-        } else {
+            const pairForApi = `${quote}_USD`;
+            setConversionPair(`${quote}/USD`);
+            fetchConversionRate(pairForApi);
+        } else if (mode === 'Indirect') {
             setConversionPair('');
+            setLotsConversionPrice(''); // Not needed, but clear it
+        } else { // Direct
+            setConversionPair('');
+            setLotsConversionPrice('');
         }
+    }, [lotsPair, fetchConversionRate]);
+
+
+    useEffect(() => {
         calculateLots();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [lotsAccountBalance, lotsRiskPct, lotsPair, lotsEntryPrice, lotsSlPrice, lotsTpPrice, lotsConversionPrice]);
+    }, [lotsAccountBalance, lotsRiskPct, lotsPair, lotsEntryPrice, lotsSlPrice, lotsTpPrice, lotsConversionPrice, calculateLots]);
 
     const handlePairChange = (value: string) => {
         setLotsPair(value);
@@ -684,7 +728,14 @@ export default function Home() {
                                 {calculationMode === 'Cross' && (
                                     <div>
                                         <label htmlFor="lotsConversionPrice" className="block text-sm font-medium text-[#5c748a] mb-1">Exchange Rate ({conversionPair})</label>
-                                        <Input type="number" id="lotsConversionPrice" value={lotsConversionPrice} onChange={(e) => setLotsConversionPrice(e.target.value)} className="form-input w-full rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
+                                        <Input 
+                                            type="text" 
+                                            id="lotsConversionPrice" 
+                                            value={isFetchingConversion ? "Fetching..." : lotsConversionPrice} 
+                                            disabled 
+                                            className="form-input w-full rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" 
+                                        />
+                                        {conversionError && <p className="text-red-500 text-xs mt-1">{conversionError}</p>}
                                     </div>
                                 )}
                                 <div>
@@ -806,7 +857,7 @@ export default function Home() {
                                                 <td className="h-[72px] px-4 py-2 text-sm font-normal leading-normal w-1/3">
                                                     <Input
                                                         type="text"
-                                                        placeholder=""
+                                                        placeholder="e.g. 60000-65000"
                                                         className="form-input w-full rounded-xl bg-white border-[#d4dce2] h-10 px-3 text-[#101518] mb-1"
                                                         value={waitingPrices[coinSymbol] || ''}
                                                         onChange={(e) => setWaitingPrices(prev => ({...prev, [coinSymbol]: e.target.value}))}
@@ -878,3 +929,5 @@ export default function Home() {
         </div>
     );
 }
+
+    
