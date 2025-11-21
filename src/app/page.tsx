@@ -7,6 +7,15 @@ import { Check, Circle, Trash, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { useToast } from "@/hooks/use-toast";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+
 
 // Import new icons
 import FinanceHubLogoIcon from '@/components/icons/FinanceHubLogoIcon';
@@ -47,7 +56,7 @@ function getMonthIndex(monthName: string): number {
   return monthMap[monthName.slice(0,3)];
 }
 
-type ActiveSection = 'notes' | 'pips' | 'crypto' | 'market' | null;
+type ActiveSection = 'notes' | 'lots' | 'crypto' | 'market' | null;
 
 export default function Home() {
     const [tasks, setTasks] = useState<Task[]>([]);
@@ -58,14 +67,23 @@ export default function Home() {
     const [activeSection, setActiveSection] = useState<ActiveSection>('notes');
 
 
-    // Forex Calculator State
-    const [stopLoss, setStopLoss] = useState('');
-    const [entry, setEntry] = useState('');
-    const [takeProfit, setTakeProfit] = useState('');
-    const [decimalPlaces, setDecimalPlaces] = useState(5);
-    const [pipsOfRisk, setPipsOfRisk] = useState<number | null>(null);
-    const [pipsOfReward, setPipsOfReward] = useState<number | null>(null);
-    const [riskRewardRatio, setRiskRewardRatio] = useState<number | null>(null);
+    // Lots Calculator State
+    const [lotsAccountBalance, setLotsAccountBalance] = useState('');
+    const [lotsRiskPct, setLotsRiskPct] = useState('');
+    const [lotsPair, setLotsPair] = useState('EURUSD');
+    const [lotsEntryPrice, setLotsEntryPrice] = useState('');
+    const [lotsSlPrice, setLotsSlPrice] = useState('');
+    const [lotsTpPrice, setLotsTpPrice] = useState('');
+    const [lotsConversionPrice, setLotsConversionPrice] = useState('');
+    const [lotsResult, setLotsResult] = useState({
+      standardLots: 0,
+      riskPips: 0,
+      rewardPips: 0,
+      rRatio: 0,
+    });
+    const [calculationMode, setCalculationMode] = useState('Direct');
+    const [conversionPair, setConversionPair] = useState('');
+
 
     // Crypto Position Sizing Calculator State
     const [cryptoEntry, setCryptoEntry] = useState('');
@@ -240,37 +258,96 @@ export default function Home() {
         }
     };
 
-    const calculatePips = () => {
-        if (!stopLoss || !entry || !takeProfit) {
-            setPipsOfRisk(null);
-            setPipsOfReward(null);
-            setRiskRewardRatio(null);
-            return;
-        }
-
-        const stopLossValue = parseFloat(stopLoss);
-        const entryValue = parseFloat(entry);
-        const takeProfitValue = parseFloat(takeProfit);
-
-        if (isNaN(stopLossValue) || isNaN(entryValue) || isNaN(takeProfitValue)) {
-            setPipsOfRisk(null);
-            setPipsOfReward(null);
-            setRiskRewardRatio(null);
-            return;
-        }
-
-        const risk = Math.abs(entryValue - stopLossValue) * Math.pow(10, decimalPlaces);
-        const reward = Math.abs(takeProfitValue - entryValue) * Math.pow(10, decimalPlaces);
-        const ratio = risk > 0 ? reward / risk : 0;
-
-        setPipsOfRisk(risk);
-        setPipsOfReward(reward);
-        setRiskRewardRatio(ratio);
+    // --- Lots Calculator Logic ---
+    const getPairDetails = (pair: string) => {
+        const base = pair.substring(0, 3);
+        const quote = pair.substring(3, 6);
+        const isJpy = pair.includes('JPY');
+        const isGold = pair.includes('XAU');
+        let pipSize = isJpy ? 0.01 : 0.0001;
+        if (isGold) pipSize = 0.01;
+        return { base, quote, pipSize };
     };
 
+    const determineCalculationMode = (accCurr: string, base: string, quote: string) => {
+        if (quote === accCurr) return 'Direct';
+        if (base === accCurr) return 'Indirect';
+        return 'Cross';
+    };
+
+    const calculateLots = () => {
+        const { base, quote, pipSize } = getPairDetails(lotsPair);
+        const mode = determineCalculationMode('USD', base, quote);
+
+        const balance = parseFloat(lotsAccountBalance) || 0;
+        const riskPct = parseFloat(lotsRiskPct) || 0;
+        const price = parseFloat(lotsEntryPrice) || 0;
+        const sl = parseFloat(lotsSlPrice) || 0;
+        const tp = parseFloat(lotsTpPrice) || 0;
+        const convPrice = parseFloat(lotsConversionPrice) || 0;
+
+        const riskAmount = balance * (riskPct / 100);
+        const stdLotSize = 100000;
+
+        let slPips = 0;
+        if (price > 0 && sl > 0) {
+            slPips = Math.abs(price - sl) / pipSize;
+        }
+
+        let tpPips = 0;
+        if (price > 0 && tp > 0) {
+            tpPips = Math.abs(tp - price) / pipSize;
+        }
+
+        let pipValueStandard = 0;
+        const rawPipValueQuote = pipSize * stdLotSize;
+
+        if (mode === 'Direct') {
+            pipValueStandard = rawPipValueQuote;
+        } else if (mode === 'Indirect') {
+            if (price > 0) pipValueStandard = rawPipValueQuote / price;
+        } else if (mode === 'Cross') { // Cross
+            pipValueStandard = rawPipValueQuote * convPrice;
+        }
+        
+        let lots = 0;
+        if (slPips > 0 && pipValueStandard > 0) {
+            lots = riskAmount / (slPips * pipValueStandard);
+        }
+
+        let rRatio = 0;
+        if (tpPips > 0 && slPips > 0) {
+            rRatio = tpPips / slPips;
+        }
+
+        setLotsResult({
+            standardLots: lots,
+            riskPips: slPips,
+            rewardPips: tpPips,
+            rRatio: rRatio,
+        });
+    };
+    
     useEffect(() => {
-        calculatePips();
-    }, [stopLoss, entry, takeProfit, decimalPlaces]);
+        const { base, quote } = getPairDetails(lotsPair);
+        const mode = determineCalculationMode('USD', base, quote);
+        setCalculationMode(mode);
+        if (mode === 'Cross') {
+            setConversionPair(`${quote}USD`);
+        } else {
+            setConversionPair('');
+        }
+        calculateLots();
+    }, [lotsAccountBalance, lotsRiskPct, lotsPair, lotsEntryPrice, lotsSlPrice, lotsTpPrice, lotsConversionPrice]);
+
+    const handlePairChange = (value: string) => {
+        setLotsPair(value);
+        setLotsEntryPrice('');
+        setLotsSlPrice('');
+        setLotsTpPrice('');
+        setLotsConversionPrice('');
+    };
+
 
      const calculateCryptoValues = () => {
         if (!cryptoEntry || !cryptoSL || !accountBalance) {
@@ -534,41 +611,93 @@ export default function Home() {
                         </div>
                     </>
                 );
-            case 'pips':
+            case 'lots':
                 return (
                     <div className="p-4 space-y-6">
-                        <h2 className="text-[#101518] text-[22px] font-bold leading-tight tracking-[-0.015em] pb-3">Pips Calculator</h2>
+                        <h2 className="text-[#101518] text-[22px] font-bold leading-tight tracking-[-0.015em] pb-3">Lots Calculator</h2>
                         <div className="flex flex-col md:flex-row gap-6">
                             <div className="md:w-1/2 space-y-5">
                                 <div>
-                                    <label htmlFor="stopLoss" className="block text-sm font-medium text-[#5c748a] mb-1">Stop Loss</label>
-                                    <Input type="number" id="stopLoss" value={stopLoss} onChange={(e) => setStopLoss(e.target.value)} className="form-input w-full rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
+                                    <label className="block text-sm font-medium text-[#5c748a] mb-1">Account Currency</label>
+                                    <Input value="USD ($)" disabled className="form-input w-full rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
                                 </div>
                                 <div>
-                                    <label htmlFor="entry" className="block text-sm font-medium text-[#5c748a] mb-1">Entry</label>
-                                    <Input type="number" id="entry" value={entry} onChange={(e) => setEntry(e.target.value)}  className="form-input w-full rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
+                                    <label htmlFor="lotsAccountBalance" className="block text-sm font-medium text-[#5c748a] mb-1">Account Balance</label>
+                                    <Input type="number" id="lotsAccountBalance" value={lotsAccountBalance} onChange={(e) => setLotsAccountBalance(e.target.value)} className="form-input w-full rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
                                 </div>
                                 <div>
-                                    <label htmlFor="takeProfit" className="block text-sm font-medium text-[#5c748a] mb-1">Take Profit</label>
-                                    <Input type="number" id="takeProfit" value={takeProfit} onChange={(e) => setTakeProfit(e.target.value)}  className="form-input w-full rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
+                                    <label htmlFor="lotsRiskPct" className="block text-sm font-medium text-[#5c748a] mb-1">Risk Percentage (%)</label>
+                                    <Input type="number" id="lotsRiskPct" value={lotsRiskPct} onChange={(e) => setLotsRiskPct(e.target.value)} className="form-input w-full rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
                                 </div>
                                 <div>
-                                    <label htmlFor="decimalPlaces" className="block text-sm font-medium text-[#5c748a] mb-1">Decimal Places</label>
-                                    <select id="decimalPlaces" value={decimalPlaces} onChange={(e) => setDecimalPlaces(parseInt(e.target.value))} className="form-select block w-full rounded-xl border-[#d4dce2] bg-[#eaedf1] h-12 px-4 text-[#101518] focus:ring-0 focus:border-[#5c748a]">
-                                        <option value={1}>1</option><option value={2}>2</option><option value={3}>3</option><option value={4}>4</option><option value={5}>5</option>
-                                    </select>
+                                    <label htmlFor="lotsPair" className="block text-sm font-medium text-[#5c748a] mb-1">Currency Pair</label>
+                                    <Select value={lotsPair} onValueChange={handlePairChange}>
+                                        <SelectTrigger className="w-full rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]">
+                                            <SelectValue placeholder="Select a pair" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectGroup>
+                                                <SelectItem value="EURUSD">EUR/USD</SelectItem>
+                                                <SelectItem value="GBPUSD">GBP/USD</SelectItem>
+                                                <SelectItem value="USDJPY">USD/JPY</SelectItem>
+                                                <SelectItem value="USDCAD">USD/CAD</SelectItem>
+                                                <SelectItem value="USDCHF">USD/CHF</SelectItem>
+                                                <SelectItem value="AUDUSD">AUD/USD</SelectItem>
+                                                <SelectItem value="NZDUSD">NZD/USD</SelectItem>
+                                            </SelectGroup>
+                                            <SelectGroup>
+                                                <SelectItem value="EURGBP">EUR/GBP</SelectItem>
+                                                <SelectItem value="EURJPY">EUR/JPY</SelectItem>
+                                                <SelectItem value="GBPJPY">GBP/JPY</SelectItem>
+                                            </SelectGroup>
+                                             <SelectGroup>
+                                                <SelectItem value="XAUUSD">XAU/USD (Gold)</SelectItem>
+                                            </SelectGroup>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div>
+                                    <label htmlFor="lotsEntryPrice" className="block text-sm font-medium text-[#5c748a] mb-1">Entry Price</label>
+                                    <Input type="number" id="lotsEntryPrice" value={lotsEntryPrice} onChange={(e) => setLotsEntryPrice(e.target.value)}  className="form-input w-full rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
+                                </div>
+                                {calculationMode === 'Cross' && (
+                                    <div>
+                                        <label htmlFor="lotsConversionPrice" className="block text-sm font-medium text-[#5c748a] mb-1">Exchange Rate ({conversionPair})</label>
+                                        <Input type="number" id="lotsConversionPrice" value={lotsConversionPrice} onChange={(e) => setLotsConversionPrice(e.target.value)} className="form-input w-full rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
+                                    </div>
+                                )}
+                                <div>
+                                    <label htmlFor="lotsSlPrice" className="block text-sm font-medium text-[#5c748a] mb-1">Stop Loss Price</label>
+                                    <Input type="number" id="lotsSlPrice" value={lotsSlPrice} onChange={(e) => setLotsSlPrice(e.target.value)}  className="form-input w-full rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
+                                </div>
+                                <div>
+                                    <label htmlFor="lotsTpPrice" className="block text-sm font-medium text-[#5c748a] mb-1">Take Profit Price</label>
+                                    <Input type="number" id="lotsTpPrice" value={lotsTpPrice} onChange={(e) => setLotsTpPrice(e.target.value)}  className="form-input w-full rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
                                 </div>
                             </div>
-                            {(pipsOfRisk !== null || pipsOfReward !== null || riskRewardRatio !== null) && (
-                                 <div className="md:w-1/2 flex items-start">
-                                    <div className="w-full space-y-2 p-4 bg-[#eaedf1] rounded-xl">
-                                        <p className="text-lg font-semibold text-[#101518]">Result:</p>
-                                        {pipsOfRisk !== null && <p className="text-[#101518]">Pips of Risk: <span className="font-medium text-[#5c748a]">{pipsOfRisk.toFixed(2)}</span></p>}
-                                        {pipsOfReward !== null && <p className="text-[#101518]">Pips of Reward: <span className="font-medium text-[#5c748a]">{pipsOfReward.toFixed(2)}</span></p>}
-                                        {riskRewardRatio !== null && <p className="text-[#101518]">Risk/Reward Ratio: <span className="font-medium text-[#5c748a]">{riskRewardRatio.toFixed(2)} : 1</span></p>}
+                            <div className="md:w-1/2 flex items-start">
+                                <div className="w-full space-y-2 p-4 bg-[#eaedf1] rounded-xl">
+                                    <p className="text-lg font-semibold text-[#101518]">Result:</p>
+                                    <div className="flex justify-between items-center pb-4 border-b border-gray-300">
+                                        <span className="text-sm font-medium text-[#5c748a]">Standard Lot Size</span>
+                                        <span className="text-3xl font-bold text-[#101518]">{lotsResult.standardLots.toFixed(2)}</span>
+                                    </div>
+                                    <div className="space-y-2 pt-2">
+                                        <div className="flex justify-between items-center text-sm">
+                                            <span className="text-[#5c748a]">Risk (Pips)</span>
+                                            <span className="font-mono font-medium text-[#101518]">{Math.round(lotsResult.riskPips)}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center text-sm">
+                                            <span className="text-[#5c748a]">Reward (Pips)</span>
+                                            <span className="font-mono font-medium text-[#101518]">{Math.round(lotsResult.rewardPips)}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center text-sm">
+                                            <span className="text-[#5c748a]">Risk/Reward Ratio</span>
+                                            <span className="font-mono font-medium text-[#101518]">{lotsResult.rRatio.toFixed(2)} : 1</span>
+                                        </div>
                                     </div>
                                 </div>
-                            )}
+                            </div>
                         </div>
                     </div>
                 );
@@ -600,8 +729,8 @@ export default function Home() {
                                 </div>
                             </div>
 
-                            {(positionSize !== null || cryptoRiskRewardRatio !== null) && (
-                                <div className="md:w-1/2 flex items-start">
+                            <div className="md:w-1/2 flex items-start">
+                                {(positionSize !== null || cryptoRiskRewardRatio !== null) && (
                                     <div className="w-full space-y-2 p-4 bg-[#eaedf1] rounded-xl">
                                         <p className="text-lg font-semibold text-[#101518]">Result:</p>
                                         {positionSize !== null && (
@@ -611,8 +740,8 @@ export default function Home() {
                                             <p className="text-[#101518]">Risk/Reward Ratio: <span className="font-medium text-[#5c748a]">{cryptoRiskRewardRatio.toFixed(2)} : 1</span></p>
                                         )}
                                     </div>
-                                </div>
-                            )}
+                                )}
+                            </div>
                         </div>
                     </div>
                 );
@@ -695,7 +824,7 @@ export default function Home() {
                   <span className="text-sm text-[#5c748a] whitespace-nowrap">{fomcDateString}</span>
               )}
             </header>
-            <div className="px-1 sm:px-2 md:px-4 lg:px-8 flex flex-1 justify-center py-5"> {/* Reduced horizontal padding by 40% */}
+            <div className="px-1 sm:px-2 md:px-4 lg:px-8 flex flex-1 justify-center py-5">
               <div className="layout-content-container flex flex-col max-w-[960px] flex-1">
                 
                 <h2 className="text-[#101518] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">Quick Actions</h2>
@@ -704,9 +833,9 @@ export default function Home() {
                     <div className="text-[#101518]"><NoteIcon /></div>
                     <h2 className="text-[#101518] text-base font-bold leading-tight text-left">Epic Notes</h2>
                   </button>
-                  <button onClick={() => toggleSection('pips')} className={cn("flex flex-1 gap-3 rounded-lg border p-4 items-center transition-colors focus:outline-none focus:ring-2 focus:ring-[#5c748a]", activeSection === 'pips' ? "bg-[#d4dce2] border-[#5c748a]" : "bg-gray-50 border-[#d4dce2] hover:bg-[#eaedf1]")}>
+                  <button onClick={() => toggleSection('lots')} className={cn("flex flex-1 gap-3 rounded-lg border p-4 items-center transition-colors focus:outline-none focus:ring-2 focus:ring-[#5c748a]", activeSection === 'lots' ? "bg-[#d4dce2] border-[#5c748a]" : "bg-gray-50 border-[#d4dce2] hover:bg-[#eaedf1]")}>
                     <div className="text-[#101518]"><CurrencyCircleDollarIcon /></div>
-                    <h2 className="text-[#101518] text-base font-bold leading-tight text-left">Pips Calculator</h2>
+                    <h2 className="text-[#101518] text-base font-bold leading-tight text-left">Lots Calculator</h2>
                   </button>
                   <button onClick={() => toggleSection('crypto')} className={cn("flex flex-1 gap-3 rounded-lg border p-4 items-center transition-colors focus:outline-none focus:ring-2 focus:ring-[#5c748a]", activeSection === 'crypto' ? "bg-[#d4dce2] border-[#5c748a]" : "bg-gray-50 border-[#d4dce2] hover:bg-[#eaedf1]")}>
                     <div className="text-[#101518]"><CurrencyBtcIcon /></div>
@@ -729,3 +858,5 @@ export default function Home() {
     );
 }
 
+
+    
