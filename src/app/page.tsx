@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import {useState, useEffect, useRef, useCallback} from 'react';
@@ -80,6 +81,7 @@ export default function Home() {
       riskPips: 0,
       rewardPips: 0,
       rRatio: 0,
+      riskAmount: 0,
     });
     const [calculationMode, setCalculationMode] = useState('Direct');
     const [conversionPair, setConversionPair] = useState('');
@@ -289,7 +291,7 @@ export default function Home() {
         const convPrice = parseFloat(lotsConversionPrice) || 0;
 
         if (balance === 0 || riskPct === 0 || price === 0 || sl === 0) {
-            setLotsResult({ standardLots: 0, riskPips: 0, rewardPips: 0, rRatio: 0 });
+            setLotsResult({ standardLots: 0, riskPips: 0, rewardPips: 0, rRatio: 0, riskAmount: 0 });
             return;
         }
 
@@ -327,6 +329,7 @@ export default function Home() {
             riskPips: slPips,
             rewardPips: tpPips,
             rRatio: rRatio,
+            riskAmount: riskAmount,
         });
     }, [lotsPair, lotsAccountBalance, lotsRiskPct, lotsEntryPrice, lotsSlPrice, lotsTpPrice, lotsConversionPrice]);
 
@@ -449,7 +452,7 @@ export default function Home() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [cryptoEntry, cryptoSL, cryptoTP, riskPercentage, accountBalance]);
 
-    const fetchMarketData = async () => {
+    const fetchMarketData = useCallback(async () => {
         setLoadingMarket(true);
         setErrorMarket(null); 
         try {
@@ -499,7 +502,7 @@ export default function Home() {
         } finally {
             setLoadingMarket(false);
         }
-    };
+    }, []);
 
     useEffect(() => {
         if (activeSection === 'market') {
@@ -507,7 +510,7 @@ export default function Home() {
           const intervalId = setInterval(fetchMarketData, 1200000); 
           return () => clearInterval(intervalId); 
         }
-    }, [activeSection]);
+    }, [activeSection, fetchMarketData]);
 
     const sendNotification = (coin: string, price: number) => {
         const commonIcon = '/favicon.ico';
@@ -766,6 +769,10 @@ export default function Home() {
                                         <div className="flex justify-between items-center text-sm">
                                             <span className="text-[#5c748a]">Risk/Reward Ratio</span>
                                             <span className="font-mono font-medium text-[#101518]">{lotsResult.rRatio.toFixed(2)} : 1</span>
+                                        </div>
+                                        <div className="flex justify-between items-center text-sm pt-2 mt-2 border-t border-gray-300">
+                                            <span className="text-[#5c748a]">Risk Amount</span>
+                                            <span className="font-mono font-medium text-[#101518]">${lotsResult.riskAmount.toFixed(2)}</span>
                                         </div>
                                     </div>
                                 </div>
