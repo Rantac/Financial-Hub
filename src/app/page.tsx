@@ -609,7 +609,6 @@ export default function Home() {
             case 'notes':
                 return (
                     <>
-                        <h2 className="text-[#101518] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">Epic Notes</h2>
                         <div className="flex flex-col gap-0">
                             {tasks.length === 0 && <p className="text-[#5c748a] text-center py-4">No tasks yet. Add one below!</p>}
                             {tasks.map((task) => (
@@ -663,9 +662,8 @@ export default function Home() {
             case 'lots':
                 return (
                     <div className="p-4 space-y-6">
-                        
                         <div className="flex flex-col md:flex-row gap-6">
-                            <div className="md:w-1/2 space-y-5">
+                            <div className="w-full md:w-1/2 space-y-5">
                                 <div>
                                     <label className="block text-sm font-medium text-[#5c748a] mb-1">Account Currency</label>
                                     <Input value="USD ($)" disabled className="form-input w-full rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
@@ -750,7 +748,7 @@ export default function Home() {
                                     <Input type="number" id="lotsTpPrice" value={lotsTpPrice} onChange={(e) => setLotsTpPrice(e.target.value)}  className="form-input w-full rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
                                 </div>
                             </div>
-                            <div className="md:w-1/2 flex items-start">
+                            <div className="w-full md:w-1/2 flex items-start">
                                 <div className="w-full space-y-2 p-4 bg-[#eaedf1] rounded-xl">
                                     <p className="text-lg font-semibold text-[#101518]">Result:</p>
                                     <div className="flex justify-between items-center pb-4 border-b border-gray-300">
@@ -785,7 +783,7 @@ export default function Home() {
                     <div className="p-4 space-y-6">
                         <h2 className="text-[#101518] text-[22px] font-bold leading-tight tracking-[-0.015em] pb-3">Crypto Position Size Calculator</h2>
                         <div className="flex flex-col md:flex-row gap-6">
-                            <div className="md:w-1/2 space-y-5">
+                            <div className="w-full md:w-1/2 space-y-5">
                                 <div>
                                     <label htmlFor="accountBalance" className="block text-sm font-medium text-[#5c748a] mb-1">Account Balance ($)</label>
                                     <Input type="number" id="accountBalance" placeholder="" value={accountBalance} onChange={(e) => setAccountBalance(e.target.value)} className="form-input w-full rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
@@ -807,7 +805,7 @@ export default function Home() {
                                     <Input type="number" id="riskPercentage" placeholder="" value={riskPercentage} onChange={(e) => setRiskPercentage(e.target.value)} className="form-input w-full rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
                                 </div>
                             </div>
-                             <div className="md:w-1/2 flex items-start">
+                             <div className="w-full md:w-1/2 flex items-start">
                                 {(positionSize !== null || cryptoRiskRewardRatio !== null) && (
                                     <div className="w-full space-y-2 p-4 bg-[#eaedf1] rounded-xl">
                                         <p className="text-lg font-semibold text-[#101518]">Result:</p>
@@ -939,4 +937,5 @@ export default function Home() {
     
 
     
+
 
