@@ -781,7 +781,6 @@ export default function Home() {
             case 'crypto':
                 return (
                     <div className="p-4 space-y-6">
-                        <h2 className="text-[#101518] text-[22px] font-bold leading-tight tracking-[-0.015em] pb-3">Crypto Position Size Calculator</h2>
                         <div className="flex flex-col md:flex-row gap-6">
                             <div className="w-full md:w-1/2 space-y-5">
                                 <div>
@@ -939,3 +938,6 @@ export default function Home() {
     
 
 
+
+
+    
