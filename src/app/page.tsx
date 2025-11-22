@@ -902,7 +902,7 @@ export default function Home() {
             <div className="px-1 sm:px-2 md:px-4 lg:px-8 flex flex-1 justify-center py-5">
               <div className="layout-content-container flex flex-col max-w-[960px] flex-1">
                 
-                <h2 className="text-[#101518] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">Quick Actions</h2>
+                
                 <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-3 p-4">
                   <button onClick={() => toggleSection('notes')} className={cn("flex flex-1 gap-3 rounded-lg border p-4 items-center transition-colors focus:outline-none focus:ring-2 focus:ring-[#5c748a]", activeSection === 'notes' ? "bg-[#d4dce2] border-[#5c748a]" : "bg-gray-50 border-[#d4dce2] hover:bg-[#eaedf1]")}>
                     <div className="text-[#101518]"><NoteIcon /></div>
