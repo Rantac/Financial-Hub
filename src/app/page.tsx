@@ -663,7 +663,7 @@ export default function Home() {
             case 'lots':
                 return (
                     <div className="p-4 space-y-6">
-                        <h2 className="text-[#101518] text-[22px] font-bold leading-tight tracking-[-0.015em] pb-3">Lots Calculator</h2>
+                        
                         <div className="flex flex-col md:flex-row gap-6">
                             <div className="md:w-1/2 space-y-5">
                                 <div>
@@ -807,8 +807,7 @@ export default function Home() {
                                     <Input type="number" id="riskPercentage" placeholder="" value={riskPercentage} onChange={(e) => setRiskPercentage(e.target.value)} className="form-input w-full rounded-xl bg-[#eaedf1] border-[#d4dce2] h-12 px-4 text-[#101518]" />
                                 </div>
                             </div>
-
-                            <div className="md:w-1/2 flex items-start">
+                             <div className="md:w-1/2 flex items-start">
                                 {(positionSize !== null || cryptoRiskRewardRatio !== null) && (
                                     <div className="w-full space-y-2 p-4 bg-[#eaedf1] rounded-xl">
                                         <p className="text-lg font-semibold text-[#101518]">Result:</p>
@@ -940,3 +939,4 @@ export default function Home() {
     
 
     
+
