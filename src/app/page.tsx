@@ -24,7 +24,6 @@ import CurrencyCircleDollarIcon from '@/components/icons/CurrencyCircleDollarIco
 import CurrencyBtcIcon from '@/components/icons/CurrencyBtcIcon';
 import ChartLineIcon from '@/components/icons/ChartLineIcon';
 import NoteIcon from '@/components/icons/NoteIcon';
-import MagnifyingGlassIcon from '@/components/icons/MagnifyingGlassIcon';
 
 interface Task {
     id: string;
@@ -609,54 +608,73 @@ export default function Home() {
             case 'notes':
                 return (
                     <>
-                        <div className="flex flex-col gap-0">
-                            {tasks.length === 0 && <p className="text-[#5c748a] text-center py-4">No tasks yet. Add one below!</p>}
-                            {tasks.map((task) => (
-                                <div
-                                    key={task.id}
-                                    className="flex items-center gap-4 bg-gray-50 px-4 min-h-[72px] py-3 border-b border-[#eaedf1]"
+                        {/* Action Bar (matching the centered layout from new_ui.html) */}
+                        <div className="mb-10 flex flex-col items-center">
+                            {tasks.length === 0 && (
+                                <p className="text-sm text-slate-500 mb-6">No tasks yet. Add one below!</p>
+                            )}
+                            <div className="flex w-full max-w-2xl space-x-2">
+                                <Input
+                                    ref={inputRef}
+                                    type="text"
+                                    placeholder="Add a new epic note..."
+                                    value={newTaskDescription}
+                                    onChange={(e) => setNewTaskDescription(e.target.value)}
+                                    onKeyDown={handleKeyDown}
+                                    className="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 transition-all"
+                                />
+                                <Button 
+                                    onClick={handleAddTask} 
+                                    className="bg-slate-600 hover:bg-slate-700 text-white font-semibold text-sm px-6 py-3 rounded-lg transition-colors"
                                 >
-                                    <div className="text-[#101518] flex items-center justify-center rounded-lg bg-[#eaedf1] shrink-0 size-12">
-                                        <NoteIcon />
-                                    </div>
-                                    <div className="flex-1 flex flex-col justify-center">
-                                        <p className={cn("text-[#101518] text-base font-medium leading-normal", task.completed && "line-through text-[#5c748a]")}>
-                                            {task.description}
-                                        </p>
-                                    </div>
-                                     <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        aria-label={task.completed ? "Mark task as incomplete" : "Mark task as complete"}
-                                        className="rounded-full h-8 w-8 hover:bg-gray-200 data-[completed=true]:bg-gray-300"
-                                        data-completed={task.completed}
-                                        onClick={() => handleCompleteTask(task.id)}
+                                    Add Note
+                                </Button>
+                            </div>
+                        </div>
+                        
+                        {/* Notes List */}
+                        {tasks.length > 0 && (
+                            <div className="flex flex-col gap-3 max-w-4xl mx-auto">
+                                {tasks.map((task) => (
+                                    <div
+                                        key={task.id}
+                                        className="flex items-center gap-4 bg-gray-50 px-4 py-4 rounded-lg border border-gray-200 hover:shadow-sm transition-shadow"
                                     >
-                                        {task.completed ? (
-                                            <Check className="h-5 w-5 text-green-600"/>
-                                        ) : (
-                                            <Circle className="h-5 w-5 text-[#5c748a]"/>
-                                        )}
-                                    </Button>
-                                    <Button variant="ghost" size="icon" aria-label="Delete task" className="h-8 w-8 hover:bg-gray-200 rounded-full text-[#5c748a] hover:text-red-500"
-                                                onClick={() => handleDeleteTask(task.id)}>
+                                        <div className="text-slate-700 flex items-center justify-center rounded-lg bg-slate-100 shrink-0 size-12">
+                                            <NoteIcon />
+                                        </div>
+                                        <div className="flex-1 flex flex-col justify-center">
+                                            <p className={cn("text-slate-900 text-base font-medium leading-normal", task.completed && "line-through text-slate-500")}>
+                                                {task.description}
+                                            </p>
+                                        </div>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            aria-label={task.completed ? "Mark task as incomplete" : "Mark task as complete"}
+                                            className="rounded-full h-8 w-8 hover:bg-gray-200 data-[completed=true]:bg-gray-300"
+                                            data-completed={task.completed}
+                                            onClick={() => handleCompleteTask(task.id)}
+                                        >
+                                            {task.completed ? (
+                                                <Check className="h-5 w-5 text-green-600"/>
+                                            ) : (
+                                                <Circle className="h-5 w-5 text-slate-500"/>
+                                            )}
+                                        </Button>
+                                        <Button 
+                                            variant="ghost" 
+                                            size="icon" 
+                                            aria-label="Delete task" 
+                                            className="h-8 w-8 hover:bg-gray-200 rounded-full text-slate-500 hover:text-red-500"
+                                            onClick={() => handleDeleteTask(task.id)}
+                                        >
                                             <Trash className="h-4 w-4"/>
-                                    </Button>
-                                </div>
-                            ))}
-                        </div>
-                         <div className="flex items-center mt-4 px-4 py-3">
-                            <Input
-                                ref={inputRef}
-                                type="text"
-                                placeholder="Add a new epic note..."
-                                value={newTaskDescription}
-                                onChange={(e) => setNewTaskDescription(e.target.value)}
-                                onKeyDown={handleKeyDown}
-                                className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-[#101518] focus:outline-0 focus:ring-0 border border-[#d4dce2] bg-[#eaedf1] focus:border-[#5c748a] h-12 placeholder:text-[#5c748a] px-4 text-base font-normal leading-normal"
-                            />
-                            <Button onClick={handleAddTask} className="ml-2 rounded-xl h-12 bg-[#5c748a] text-white hover:bg-[#4a5e70]">Add Note</Button>
-                        </div>
+                                        </Button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </>
                 );
             case 'lots':
@@ -886,49 +904,117 @@ export default function Home() {
     };
 
     return (
-        <div className="relative flex size-full min-h-screen flex-col bg-gray-50 group/design-root overflow-x-hidden">
-          <div className="layout-container flex h-full grow flex-col">
-            <header className="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#eaedf1] px-10 py-3">
-              <div className="flex items-center gap-4 text-[#101518]">
-                <div className="size-7 text-[#5c748a]"> 
-                  <FinanceHubLogoIcon />
+        <div className="h-full flex overflow-hidden text-slate-700 font-sans bg-gray-50">
+            {/* BEGIN: Main Navigation Sidebar */}
+            <aside className="w-60 flex-shrink-0 border-r border-gray-200 bg-white flex flex-col justify-between">
+                <div className="flex flex-col">
+                    {/* Brand Identity */}
+                    <div className="p-6 flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-slate-800 rounded flex items-center justify-center">
+                            <FinanceHubLogoIcon className="w-5 h-5 text-white" />
+                        </div>
+                        <span className="font-bold text-lg tracking-tight">Financial Hub</span>
+                    </div>
+                    
+                    {/* Main Menu */}
+                    <nav className="px-4 space-y-1">
+                        <button 
+                            onClick={() => toggleSection('notes')} 
+                            className={cn(
+                                "w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors",
+                                activeSection === 'notes' 
+                                    ? "bg-gray-100 text-slate-900" 
+                                    : "text-gray-600 hover:bg-gray-100"
+                            )}
+                        >
+                            <NoteIcon className="w-5 h-5 mr-3" />
+                            Epic Notes
+                            {activeSection === 'notes' && (
+                                <span className="ml-auto inline-block py-0.5 px-2 text-xs font-semibold rounded-full bg-slate-800 text-white">Active</span>
+                            )}
+                        </button>
+                        
+                        <button 
+                            onClick={() => toggleSection('lots')} 
+                            className={cn(
+                                "w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors",
+                                activeSection === 'lots' 
+                                    ? "bg-gray-100 text-slate-900" 
+                                    : "text-gray-600 hover:bg-gray-100"
+                            )}
+                        >
+                            <CurrencyCircleDollarIcon className="w-5 h-5 mr-3" />
+                            Lots Calculator
+                        </button>
+                        
+                        <button 
+                            onClick={() => toggleSection('crypto')} 
+                            className={cn(
+                                "w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors",
+                                activeSection === 'crypto' 
+                                    ? "bg-gray-100 text-slate-900" 
+                                    : "text-gray-600 hover:bg-gray-100"
+                            )}
+                        >
+                            <CurrencyBtcIcon className="w-5 h-5 mr-3" />
+                            Crypto Calculator
+                        </button>
+                        
+                        <button 
+                            onClick={() => toggleSection('market')} 
+                            className={cn(
+                                "w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors",
+                                activeSection === 'market' 
+                                    ? "bg-gray-100 text-slate-900" 
+                                    : "text-gray-600 hover:bg-gray-100"
+                            )}
+                        >
+                            <ChartLineIcon className="w-5 h-5 mr-3" />
+                            Market Pricing
+                        </button>
+                    </nav>
                 </div>
-                <h2 className="text-[#101518] text-lg font-bold leading-tight tracking-[-0.015em]">Financial Hub</h2>
-              </div>
-              {fomcDateString && (
-                  <span className="text-sm text-[#5c748a] whitespace-nowrap">{fomcDateString}</span>
-              )}
-            </header>
-            <div className="px-1 sm:px-2 md:px-4 lg:px-8 flex flex-1 justify-center py-5">
-              <div className="layout-content-container flex flex-col max-w-[960px] flex-1">
                 
-                
-                <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-3 p-4">
-                  <button onClick={() => toggleSection('notes')} className={cn("flex flex-1 gap-3 rounded-lg border p-4 items-center transition-colors focus:outline-none focus:ring-2 focus:ring-[#5c748a]", activeSection === 'notes' ? "bg-[#d4dce2] border-[#5c748a]" : "bg-gray-50 border-[#d4dce2] hover:bg-[#eaedf1]")}>
-                    <div className="text-[#101518]"><NoteIcon /></div>
-                    <h2 className="text-[#101518] text-base font-bold leading-tight text-left">Epic Notes</h2>
-                  </button>
-                  <button onClick={() => toggleSection('lots')} className={cn("flex flex-1 gap-3 rounded-lg border p-4 items-center transition-colors focus:outline-none focus:ring-2 focus:ring-[#5c748a]", activeSection === 'lots' ? "bg-[#d4dce2] border-[#5c748a]" : "bg-gray-50 border-[#d4dce2] hover:bg-[#eaedf1]")}>
-                    <div className="text-[#101518]"><CurrencyCircleDollarIcon /></div>
-                    <h2 className="text-[#101518] text-base font-bold leading-tight text-left">Lots Calculator</h2>
-                  </button>
-                  <button onClick={() => toggleSection('crypto')} className={cn("flex flex-1 gap-3 rounded-lg border p-4 items-center transition-colors focus:outline-none focus:ring-2 focus:ring-[#5c748a]", activeSection === 'crypto' ? "bg-[#d4dce2] border-[#5c748a]" : "bg-gray-50 border-[#d4dce2] hover:bg-[#eaedf1]")}>
-                    <div className="text-[#101518]"><CurrencyBtcIcon /></div>
-                    <h2 className="text-[#101518] text-base font-bold leading-tight text-left">Crypto Calculator</h2>
-                  </button>
-                  <button onClick={() => toggleSection('market')} className={cn("flex flex-1 gap-3 rounded-lg border p-4 items-center transition-colors focus:outline-none focus:ring-2 focus:ring-[#5c748a]", activeSection === 'market' ? "bg-[#d4dce2] border-[#5c748a]" : "bg-gray-50 border-[#d4dce2] hover:bg-[#eaedf1]")}>
-                    <div className="text-[#101518]"><ChartLineIcon /></div>
-                    <h2 className="text-[#101518] text-base font-bold leading-tight text-left">Market Pricing</h2>
-                  </button>
+                {/* User Profile Footer */}
+                <div className="p-4 border-t border-gray-100">
+                    <div className="flex items-center space-x-3">
+                        <div className="w-9 h-9 rounded-full bg-slate-200 flex items-center justify-center">
+                            <span className="text-sm font-semibold text-slate-700">LS</span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-gray-900 truncate">Lisa Smith</p>
+                        </div>
+                        <div className="flex space-x-2 text-gray-400">
+                            <button className="hover:text-gray-600">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"/>
+                                    <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
                 </div>
+            </aside>
+            {/* END: Main Navigation Sidebar */}
+            
+            {/* BEGIN: Main Content Area */}
+            <main className="flex-1 overflow-y-auto bg-white">
+                {/* Top Header */}
+                <header className="h-16 border-b border-gray-100 flex items-center justify-between px-8 sticky top-0 bg-white z-10">
+                    <div className="flex-1"></div>
+                    <div className="flex items-center space-x-6">
+                        {fomcDateString && (
+                            <div className="text-xs text-gray-400 font-medium">{fomcDateString}</div>
+                        )}
+                    </div>
+                </header>
                 
-                <div className="mt-2">
+                {/* Content View */}
+                <div className="p-8 max-w-6xl">
                     {renderActiveSection()}
                 </div>
-
-              </div>
-            </div>
-          </div>
+            </main>
+            {/* END: Main Content Area */}
         </div>
     );
 }
