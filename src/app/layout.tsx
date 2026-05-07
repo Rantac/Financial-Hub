@@ -2,6 +2,7 @@ import type {Metadata} from 'next';
 import { Work_Sans, Noto_Sans } from 'next/font/google'; // Changed fonts
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
+import AuthProvider from '@/components/AuthProvider';
 
 const workSans = Work_Sans({ // Changed font
   variable: '--font-work-sans', // Changed variable
@@ -28,8 +29,10 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full">
       <body className={`${workSans.variable} ${notoSans.variable} font-sans antialiased h-full`}>
-        {children}
-        <Toaster />
+        <AuthProvider>
+          {children}
+          <Toaster />
+        </AuthProvider>
       </body>
     </html>
   );

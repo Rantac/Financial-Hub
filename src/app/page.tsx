@@ -3,8 +3,9 @@
 'use client';
 
 import {useState, useEffect, useRef, useCallback} from 'react';
+import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
-import { Check, Circle, Trash, RefreshCw } from 'lucide-react';
+import { Check, Circle, Trash, RefreshCw, Settings, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { useToast } from "@/hooks/use-toast";
@@ -16,6 +17,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 
 
 // Import new icons
@@ -24,9 +33,10 @@ import CurrencyCircleDollarIcon from '@/components/icons/CurrencyCircleDollarIco
 import CurrencyBtcIcon from '@/components/icons/CurrencyBtcIcon';
 import ChartLineIcon from '@/components/icons/ChartLineIcon';
 import NoteIcon from '@/components/icons/NoteIcon';
+import UserInfo from '@/components/UserInfo';
 
 interface Task {
-    id: string;
+    _id: string;
     description: string;
     completed: boolean;
 }
@@ -35,12 +45,13 @@ interface FomcMeeting {
   month: string;
   startDay: number;
   endDay: number;
+  hasAsterisk?: boolean;
 }
 
-const fomcMeetingDates: FomcMeeting[] = [
+const defaultFomcMeetingDates: FomcMeeting[] = [
   { month: 'Jan', startDay: 28, endDay: 29 },
   { month: 'Mar', startDay: 18, endDay: 19 },
-  { month: 'May', startDay: 6, endDay: 7 },
+  { month: 'May', startDay: 6, endDay: 7, hasAsterisk: true },
   { month: 'Jun', startDay: 17, endDay: 18 },
   { month: 'Jul', startDay: 29, endDay: 30 },
   { month: 'Sep', startDay: 16, endDay: 17 },
@@ -59,12 +70,19 @@ function getMonthIndex(monthName: string): number {
 type ActiveSection = 'notes' | 'lots' | 'crypto' | 'market' | null;
 
 export default function Home() {
+    const { data: session } = useSession();
     const [tasks, setTasks] = useState<Task[]>([]);
     const [newTaskDescription, setNewTaskDescription] = useState('');
     const {toast} = useToast();
     const inputRef = useRef<HTMLInputElement>(null);
     const [fomcDateString, setFomcDateString] = useState('');
     const [activeSection, setActiveSection] = useState<ActiveSection>('notes');
+    const [fomcDialogOpen, setFomcDialogOpen] = useState(false);
+    const [fomcMeetings, setFomcMeetings] = useState<FomcMeeting[]>(defaultFomcMeetingDates);
+    const [newFomcMonth, setNewFomcMonth] = useState('');
+    const [newFomcStartDay, setNewFomcStartDay] = useState('');
+    const [newFomcEndDay, setNewFomcEndDay] = useState('');
+    const [newFomcHasAsterisk, setNewFomcHasAsterisk] = useState(false);
 
 
     // Lots Calculator State
@@ -156,14 +174,29 @@ export default function Home() {
     };
 
     useEffect(() => {
-        const storedTasks = localStorage.getItem('tasks');
-        if (storedTasks) {
-            setTasks(JSON.parse(storedTasks));
-        }
+        // Fetch tasks from API
+        const fetchTasks = async () => {
+            try {
+                const response = await fetch('/api/tasks');
+                if (response.ok) {
+                    const data = await response.json();
+                    setTasks(data.tasks);
+                }
+            } catch (error) {
+                console.error('Error fetching tasks:', error);
+            }
+        };
+
+        fetchTasks();
 
         const storedWaitingPrices = localStorage.getItem('waitingPrices');
         if (storedWaitingPrices) {
             setWaitingPrices(JSON.parse(storedWaitingPrices));
+        }
+
+        const storedFomcMeetings = localStorage.getItem('fomcMeetings');
+        if (storedFomcMeetings) {
+            setFomcMeetings(JSON.parse(storedFomcMeetings));
         }
         
         requestNotificationPermission();
@@ -176,13 +209,18 @@ export default function Home() {
 
     }, []);
 
-    useEffect(() => {
-        localStorage.setItem('tasks', JSON.stringify(tasks));
-    }, [tasks]);
+    // Remove localStorage sync for tasks
+    // useEffect(() => {
+    //     localStorage.setItem('tasks', JSON.stringify(tasks));
+    // }, [tasks]);
 
     useEffect(() => {
         localStorage.setItem('waitingPrices', JSON.stringify(waitingPrices));
     }, [waitingPrices]);
+
+    useEffect(() => {
+        localStorage.setItem('fomcMeetings', JSON.stringify(fomcMeetings));
+    }, [fomcMeetings]);
 
 
     useEffect(() => {
@@ -190,9 +228,9 @@ export default function Home() {
       today.setHours(0, 0, 0, 0); 
       const currentYear = today.getFullYear();
     
-      let upcomingMeetingData: { month: string; startDay: number; endDay: number; year: number } | null = null;
+      let upcomingMeetingData: { month: string; startDay: number; endDay: number; year: number; hasAsterisk?: boolean } | null = null;
     
-      for (const meeting of fomcMeetingDates) {
+      for (const meeting of fomcMeetings) {
         const meetingEndDate = new Date(currentYear, getMonthIndex(meeting.month), meeting.endDay, 23, 59, 59, 999);
         if (meetingEndDate >= today) {
           upcomingMeetingData = { ...meeting, year: currentYear };
@@ -200,27 +238,38 @@ export default function Home() {
         }
       }
     
-      if (!upcomingMeetingData && fomcMeetingDates.length > 0) {
-        upcomingMeetingData = { ...fomcMeetingDates[0], year: currentYear + 1 };
+      if (!upcomingMeetingData && fomcMeetings.length > 0) {
+        upcomingMeetingData = { ...fomcMeetings[0], year: currentYear + 1 };
       }
     
       if (upcomingMeetingData) {
-        setFomcDateString(`FOMC: ${upcomingMeetingData.month} ${upcomingMeetingData.startDay}-${upcomingMeetingData.endDay}`);
+        const asterisk = upcomingMeetingData.hasAsterisk ? '*' : '';
+        setFomcDateString(`FOMC: ${upcomingMeetingData.month} ${upcomingMeetingData.startDay}-${upcomingMeetingData.endDay}${asterisk}`);
       } else {
         setFomcDateString('FOMC: TBD');
       }
-    }, []);
+    }, [fomcMeetings]);
 
 
     const handleAddTask = async () => {
         if (newTaskDescription.trim() !== '') {
             try {
-                const newTask: Task = {
-                    id: Date.now().toString(),
-                    description: newTaskDescription,
-                    completed: false,
-                };
-                setTasks([...tasks, newTask]);
+                const response = await fetch('/api/tasks', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        description: newTaskDescription,
+                    }),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to create task');
+                }
+
+                const data = await response.json();
+                setTasks([...tasks, data.task]);
                 setNewTaskDescription('');
                 inputRef.current?.focus(); 
                 toast({
@@ -243,22 +292,83 @@ export default function Home() {
         }
     };
 
-    const handleCompleteTask = (id: string) => {
-        setTasks(
-            tasks.map((task) =>
-                task.id === id ? {...task, completed: !task.completed} : task
-            )
-        );
+    const handleCompleteTask = async (id: string) => {
+        try {
+            const task = tasks.find(t => t._id === id);
+            if (!task) return;
+
+            const response = await fetch(`/api/tasks/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    completed: !task.completed,
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to update task');
+            }
+
+            const data = await response.json();
+            setTasks(
+                tasks.map((t) =>
+                    t._id === id ? data.task : t
+                )
+            );
+        } catch (error: any) {
+            toast({
+                title: 'Error updating task',
+                description: error.message,
+                variant: 'destructive',
+            });
+        }
     };
 
-    const handleDeleteTask = (id: string) => {
-        setTasks(tasks.filter((task) => task.id !== id));
+    const handleDeleteTask = async (id: string) => {
+        try {
+            const response = await fetch(`/api/tasks/${id}`, {
+                method: 'DELETE',
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to delete task');
+            }
+
+            setTasks(tasks.filter((task) => task._id !== id));
+            toast({
+                title: 'Task Deleted',
+                description: 'Task has been removed successfully.',
+            });
+        } catch (error: any) {
+            toast({
+                title: 'Error deleting task',
+                description: error.message,
+                variant: 'destructive',
+            });
+        }
     };
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === 'Enter') {
             handleAddTask();
         }
+    };
+
+    // Helper function to highlight FOREX keyword
+    const highlightForex = (text: string) => {
+        const parts = text.split(/(FOREX)/gi);
+        return parts.map((part, index) => {
+            if (part.toUpperCase() === 'FOREX') {
+                return (
+                    <span key={index} className="text-red-600 font-semibold">
+                        {part}
+                    </span>
+                );
+            }
+            return part;
+        });
     };
 
     // --- Lots Calculator Logic ---
@@ -599,6 +709,45 @@ export default function Home() {
         }
     }, [coinPrices, waitingPrices, isClientMobile]);
 
+    const handleAddFomcMeeting = () => {
+        if (newFomcMonth && newFomcStartDay && newFomcEndDay) {
+            const newMeeting: FomcMeeting = {
+                month: newFomcMonth,
+                startDay: parseInt(newFomcStartDay),
+                endDay: parseInt(newFomcEndDay),
+                hasAsterisk: newFomcHasAsterisk
+            };
+            setFomcMeetings([...fomcMeetings, newMeeting].sort((a, b) => {
+                const monthOrder = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                return monthOrder.indexOf(a.month) - monthOrder.indexOf(b.month);
+            }));
+            setNewFomcMonth('');
+            setNewFomcStartDay('');
+            setNewFomcEndDay('');
+            setNewFomcHasAsterisk(false);
+            toast({
+                title: 'FOMC Meeting Added!',
+                description: 'The meeting has been added to your schedule.',
+            });
+        }
+    };
+
+    const handleDeleteFomcMeeting = (index: number) => {
+        setFomcMeetings(fomcMeetings.filter((_, i) => i !== index));
+        toast({
+            title: 'FOMC Meeting Deleted',
+            description: 'The meeting has been removed from your schedule.',
+        });
+    };
+
+    const handleResetFomcMeetings = () => {
+        setFomcMeetings(defaultFomcMeetingDates);
+        toast({
+            title: 'FOMC Schedule Reset',
+            description: 'The schedule has been reset to default.',
+        });
+    };
+
     const toggleSection = (section: ActiveSection) => {
         setActiveSection(prevSection => prevSection === section ? null : section);
     };
@@ -637,7 +786,7 @@ export default function Home() {
                             <div className="flex flex-col gap-3 max-w-4xl mx-auto">
                                 {tasks.map((task) => (
                                     <div
-                                        key={task.id}
+                                        key={task._id}
                                         className="flex items-center gap-4 bg-gray-50 px-4 py-4 rounded-lg border border-gray-200 hover:shadow-sm transition-shadow"
                                     >
                                         <div className="text-slate-700 flex items-center justify-center rounded-lg bg-slate-100 shrink-0 size-12">
@@ -645,7 +794,7 @@ export default function Home() {
                                         </div>
                                         <div className="flex-1 flex flex-col justify-center">
                                             <p className={cn("text-slate-900 text-base font-medium leading-normal", task.completed && "line-through text-slate-500")}>
-                                                {task.description}
+                                                {highlightForex(task.description)}
                                             </p>
                                         </div>
                                         <Button
@@ -654,7 +803,7 @@ export default function Home() {
                                             aria-label={task.completed ? "Mark task as incomplete" : "Mark task as complete"}
                                             className="rounded-full h-8 w-8 hover:bg-gray-200 data-[completed=true]:bg-gray-300"
                                             data-completed={task.completed}
-                                            onClick={() => handleCompleteTask(task.id)}
+                                            onClick={() => handleCompleteTask(task._id)}
                                         >
                                             {task.completed ? (
                                                 <Check className="h-5 w-5 text-green-600"/>
@@ -667,7 +816,7 @@ export default function Home() {
                                             size="icon" 
                                             aria-label="Delete task" 
                                             className="h-8 w-8 hover:bg-gray-200 rounded-full text-slate-500 hover:text-red-500"
-                                            onClick={() => handleDeleteTask(task.id)}
+                                            onClick={() => handleDeleteTask(task._id)}
                                         >
                                             <Trash className="h-4 w-4"/>
                                         </Button>
@@ -861,21 +1010,21 @@ export default function Home() {
                                 <table className="w-full table-fixed">
                                     <thead className="bg-[#eaedf1]">
                                         <tr>
-                                            <th className="px-4 py-3 text-left text-[#101518] text-sm font-medium leading-normal w-1/3">Name</th>
-                                            <th className="px-4 py-3 text-left text-[#101518] text-sm font-medium leading-normal w-1/3">Price</th>
-                                            <th className="px-4 py-3 text-left text-[#101518] text-sm font-medium leading-normal w-1/3">Set Alert Range & Status</th>
+                                            <th className="px-4 py-3 text-center text-[#101518] text-sm font-medium leading-normal w-1/3">Name</th>
+                                            <th className="px-4 py-3 text-center text-[#101518] text-sm font-medium leading-normal w-1/3">Price</th>
+                                            <th className="px-4 py-3 text-center text-[#101518] text-sm font-medium leading-normal w-1/3">Set Alert Range & Status</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {(Object.keys(coinPrices) as CoinSymbol[]).map((coinSymbol) => (
                                             <tr key={coinSymbol} className="border-t border-[#d4dce2]">
-                                                <td className="h-[72px] px-4 py-2 text-[#101518] text-sm font-normal leading-normal w-1/3">
+                                                <td className="h-[72px] px-4 py-2 text-center text-[#101518] text-sm font-normal leading-normal w-1/3">
                                                     {coinSymbol}
                                                 </td>
-                                                <td className="h-[72px] px-4 py-2 text-[#5c748a] text-sm font-normal leading-normal w-1/3">
+                                                <td className="h-[72px] px-4 py-2 text-center text-[#5c748a] text-sm font-normal leading-normal w-1/3">
                                                     {coinPrices[coinSymbol] !== null ? `$${coinPrices[coinSymbol]!.toFixed(2)}` : 'Loading...'}
                                                 </td>
-                                                <td className="h-[72px] px-4 py-2 text-sm font-normal leading-normal w-1/3">
+                                                <td className="h-[72px] px-4 py-2 text-center text-sm font-normal leading-normal w-1/3">
                                                     <Input
                                                         type="text"
                                                         placeholder="e.g. 60000-65000"
@@ -884,7 +1033,7 @@ export default function Home() {
                                                         onChange={(e) => setWaitingPrices(prev => ({...prev, [coinSymbol]: e.target.value}))}
                                                     />
                                                     {waitingPrices[coinSymbol] && coinPrices[coinSymbol] && getStatus(coinSymbol) && (
-                                                        <p className="mt-1 text-xs text-[#101518]">Status: <span className={cn(
+                                                        <p className="mt-1 text-xs text-center text-[#101518]">Status: <span className={cn(
                                                             getStatus(coinSymbol) === 'Within' ? 'text-green-600' : 
                                                             getStatus(coinSymbol) === 'Above' || getStatus(coinSymbol) === 'Below' ? 'text-red-600' : 'text-[#5c748a]'
                                                         )}>{getStatus(coinSymbol)}</span></p>
@@ -972,27 +1121,26 @@ export default function Home() {
                             <ChartLineIcon className="w-5 h-5 mr-3" />
                             Market Pricing
                         </button>
+                        
+                        {/* User Management - Super Admin Only */}
+                        {(session?.user as any)?.role === 'superadmin' && (
+                            <>
+                                <div className="my-2 border-t border-gray-200"></div>
+                                <button 
+                                    onClick={() => window.location.href = '/auth/signup'} 
+                                    className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors text-gray-600 hover:bg-gray-100"
+                                >
+                                    <Users className="w-5 h-5 mr-3" />
+                                    User Management
+                                </button>
+                            </>
+                        )}
                     </nav>
                 </div>
                 
                 {/* User Profile Footer */}
                 <div className="p-4 border-t border-gray-100">
-                    <div className="flex items-center space-x-3">
-                        <div className="w-9 h-9 rounded-full bg-slate-200 flex items-center justify-center">
-                            <span className="text-sm font-semibold text-slate-700">LS</span>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-gray-900 truncate">Lisa Smith</p>
-                        </div>
-                        <div className="flex space-x-2 text-gray-400">
-                            <button className="hover:text-gray-600">
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"/>
-                                    <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"/>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
+                    <UserInfo />
                 </div>
             </aside>
             {/* END: Main Navigation Sidebar */}
@@ -1004,13 +1152,143 @@ export default function Home() {
                     <div className="flex-1"></div>
                     <div className="flex items-center space-x-6">
                         {fomcDateString && (
-                            <div className="text-xs text-gray-400 font-medium">{fomcDateString}</div>
+                            <Dialog open={fomcDialogOpen} onOpenChange={setFomcDialogOpen}>
+                                <DialogTrigger asChild>
+                                    <button className="text-base text-black font-medium hover:text-gray-600 transition-colors flex items-center gap-1 cursor-pointer">
+                                        {fomcDateString}
+                                        <Settings className="w-3 h-3" />
+                                    </button>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                                    <DialogHeader>
+                                        <DialogTitle>FOMC Meeting Schedule</DialogTitle>
+                                        <DialogDescription>
+                                            Manage your FOMC meeting dates. Add asterisk (*) for special meetings.
+                                        </DialogDescription>
+                                    </DialogHeader>
+                                    
+                                    {/* Current Meetings List */}
+                                    <div className="space-y-4 mt-4">
+                                        <div className="flex justify-between items-center">
+                                            <h3 className="text-sm font-semibold text-slate-900">Current Schedule</h3>
+                                            <Button 
+                                                variant="outline" 
+                                                size="sm" 
+                                                onClick={handleResetFomcMeetings}
+                                                className="text-xs"
+                                            >
+                                                Reset to Default
+                                            </Button>
+                                        </div>
+                                        <div className="border rounded-lg divide-y max-h-60 overflow-y-auto">
+                                            {fomcMeetings.length === 0 ? (
+                                                <div className="p-4 text-center text-sm text-gray-500">
+                                                    No meetings scheduled. Add one below.
+                                                </div>
+                                            ) : (
+                                                fomcMeetings.map((meeting, index) => (
+                                                    <div key={index} className="flex items-center justify-between p-3 hover:bg-gray-50">
+                                                        <div className="text-sm">
+                                                            <span className="font-medium">{meeting.month}</span>
+                                                            <span className="text-gray-600 ml-2">
+                                                                {meeting.startDay}-{meeting.endDay}
+                                                            </span>
+                                                            {meeting.hasAsterisk && (
+                                                                <span className="text-blue-600 ml-1">*</span>
+                                                            )}
+                                                        </div>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            onClick={() => handleDeleteFomcMeeting(index)}
+                                                            className="h-8 w-8 text-red-500 hover:text-red-700"
+                                                        >
+                                                            <Trash className="h-4 w-4" />
+                                                        </Button>
+                                                    </div>
+                                                ))
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Add New Meeting Form */}
+                                    <div className="space-y-4 mt-6 border-t pt-6">
+                                        <h3 className="text-sm font-semibold text-slate-900">Add New Meeting</h3>
+                                        <div className="grid grid-cols-3 gap-3">
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700 mb-1">Month</label>
+                                                <Select value={newFomcMonth} onValueChange={setNewFomcMonth}>
+                                                    <SelectTrigger className="w-full">
+                                                        <SelectValue placeholder="Month" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="Jan">Jan</SelectItem>
+                                                        <SelectItem value="Feb">Feb</SelectItem>
+                                                        <SelectItem value="Mar">Mar</SelectItem>
+                                                        <SelectItem value="Apr">Apr</SelectItem>
+                                                        <SelectItem value="May">May</SelectItem>
+                                                        <SelectItem value="Jun">Jun</SelectItem>
+                                                        <SelectItem value="Jul">Jul</SelectItem>
+                                                        <SelectItem value="Aug">Aug</SelectItem>
+                                                        <SelectItem value="Sep">Sep</SelectItem>
+                                                        <SelectItem value="Oct">Oct</SelectItem>
+                                                        <SelectItem value="Nov">Nov</SelectItem>
+                                                        <SelectItem value="Dec">Dec</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700 mb-1">Start Day</label>
+                                                <Input
+                                                    type="number"
+                                                    min="1"
+                                                    max="31"
+                                                    placeholder="1-31"
+                                                    value={newFomcStartDay}
+                                                    onChange={(e) => setNewFomcStartDay(e.target.value)}
+                                                    className="w-full"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700 mb-1">End Day</label>
+                                                <Input
+                                                    type="number"
+                                                    min="1"
+                                                    max="31"
+                                                    placeholder="1-31"
+                                                    value={newFomcEndDay}
+                                                    onChange={(e) => setNewFomcEndDay(e.target.value)}
+                                                    className="w-full"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center space-x-2">
+                                            <input
+                                                type="checkbox"
+                                                id="hasAsterisk"
+                                                checked={newFomcHasAsterisk}
+                                                onChange={(e) => setNewFomcHasAsterisk(e.target.checked)}
+                                                className="rounded border-gray-300 text-slate-600 focus:ring-slate-500"
+                                            />
+                                            <label htmlFor="hasAsterisk" className="text-sm text-gray-700">
+                                                Mark with asterisk (*) for special meeting
+                                            </label>
+                                        </div>
+                                        <Button 
+                                            onClick={handleAddFomcMeeting}
+                                            className="w-full bg-slate-600 hover:bg-slate-700"
+                                        >
+                                            Add Meeting
+                                        </Button>
+                                    </div>
+                                </DialogContent>
+                            </Dialog>
                         )}
                     </div>
                 </header>
                 
                 {/* Content View */}
-                <div className="p-8 max-w-6xl">
+                <div className="p-8 max-w-6xl mx-auto">
                     {renderActiveSection()}
                 </div>
             </main>
